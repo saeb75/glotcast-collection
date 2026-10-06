@@ -1,0 +1,7 @@
+# This repository is the GlotCast server: the API and the admin panel (deployed together by Coolify from
+# glotcast-api/docker-compose.yml). The other folders here are separate repositories and are not tracked.
+/*
+!/.gitignore
+!/README.md
+!/glotcast-api/
+!/glotcast-admin/
