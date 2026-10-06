@@ -1,0 +1,58 @@
+# GlotCast server: the API and the admin panel, one Coolify resource (New Resource → Docker Compose, this file).
+# The database and auth stay on Supabase, media on Cloudflare R2. Set every ${…} in Coolify's Environment
+# Variables; docs/deploy.md walks through it.
+#
+# `admin` is the Next.js panel in ../glotcast-admin (its own Dockerfile): both folders must be in the checkout
+# Coolify builds from (see docs/deploy.md for deploying them as two resources instead).
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      TRUST_PROXY: ${TRUST_PROXY:-1} # 1 = Coolify's Traefik; 2 = Cloudflare (proxied DNS) + Traefik
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+      DATABASE_URL: ${DATABASE_URL:?}
+      DATABASE_MIGRATION_URL: ${DATABASE_MIGRATION_URL:?}
+      DATABASE_SSL: ${DATABASE_SSL:-true}
+      DATABASE_SSL_CA: ${DATABASE_SSL_CA:-}
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
+      STRAPI_DATABASE_URL: ${STRAPI_DATABASE_URL:-}
+      STRAPI_PUBLIC_URL: ${STRAPI_PUBLIC_URL:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:?}
+      SUPABASE_URL: ${SUPABASE_URL:?}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-}
+      APP_MIN_SUPPORTED_VERSION: ${APP_MIN_SUPPORTED_VERSION:-1.0.0}
+      APP_LATEST_VERSION: ${APP_LATEST_VERSION:-1.0.0}
+      GOOGLE_TRANSLATE_API_KEY: ${GOOGLE_TRANSLATE_API_KEY:-}
+      YANDEX_DICT_KEY: ${YANDEX_DICT_KEY:-}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:-}
+      ASSEMBLYAI_API_KEY: ${ASSEMBLYAI_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_IMAGE_MODEL: ${GEMINI_IMAGE_MODEL:-gemini-3.1-flash-image-preview}
+    restart: unless-stopped
+
+  admin:
+    # Built by its own Dockerfile; the build args are the public values a Next.js build bakes in (match the names
+    # glotcast-admin's Dockerfile declares).
+    build:
+      context: ../glotcast-admin
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${ADMIN_API_URL:?}
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:?}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:?}
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - api
+    restart: unless-stopped

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+# openapi build output (npm run openapi), kept apart from the dev watcher's dist/
+tools-dist/
+# Secrets: never committed; .env.example is the template.
+.env
+.env.*
+!.env.example
+# The local Postgres cluster (npm run db:local) and its log.
+.pgdata/
+.pgdata.log
+.DS_Store
+*.log
+
+# local data imports (never committed)
+.local/

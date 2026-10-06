@@ -1,0 +1,14 @@
+.git
+node_modules
+dist
+tools-dist
+coverage
+.pgdata
+.pgdata.log
+.env
+.env.*
+!.env.example
+test
+docs
+*.log
+.DS_Store
