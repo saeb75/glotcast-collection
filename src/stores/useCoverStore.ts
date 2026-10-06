@@ -34,6 +34,8 @@ interface CoverState {
 export const useCoverStore = create<CoverState>()((set) => ({
   sessions: {},
   patch: (key, patch) =>
-    set((s) => ({ sessions: { ...s.sessions, [key]: { ...(s.sessions[key] ?? NEW_COVER_SESSION), ...patch } } })),
+    set((s) => ({
+      sessions: { ...s.sessions, [key]: { ...(s.sessions[key] ?? NEW_COVER_SESSION), ...patch } },
+    })),
   clear: () => set({ sessions: {} }),
 }))

@@ -35,7 +35,12 @@ export function PodcastSelect({
   const podcasts = options?.data ?? []
   return (
     <Select value={value || undefined} onValueChange={onChange}>
-      <SelectTrigger id={id} className={cn("w-56", className)} aria-label={label} aria-invalid={invalid || undefined}>
+      <SelectTrigger
+        id={id}
+        className={cn("w-56", className)}
+        aria-label={label}
+        aria-invalid={invalid || undefined}
+      >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent align="end" className="max-h-80">

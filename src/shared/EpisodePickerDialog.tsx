@@ -3,7 +3,14 @@
 import { Check, Plus, SearchX } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { PICKER_PAGE, PickerController, pickerKey } from "@/controllers/PickerController"
@@ -78,7 +85,10 @@ export function EpisodePickerDialog({
         <div className="min-h-48 flex-1 overflow-y-auto border-t">
           {entry?.error && !data ? (
             <div className="p-4">
-              <ErrorState message={entry.error} onRetry={() => void PickerController.search(q, podcast, pageSize)} />
+              <ErrorState
+                message={entry.error}
+                onRetry={() => void PickerController.search(q, podcast, pageSize)}
+              />
             </div>
           ) : !data ? (
             <div className="space-y-2 p-4">
@@ -107,7 +117,9 @@ export function EpisodePickerDialog({
                       <span
                         className={cn(
                           "flex size-7 shrink-0 items-center justify-center rounded-md border",
-                          added ? "border-transparent bg-foreground text-background" : "text-muted-foreground",
+                          added
+                            ? "border-transparent bg-foreground text-background"
+                            : "text-muted-foreground",
                         )}
                         aria-label={added ? PICKER.added : undefined}
                       >

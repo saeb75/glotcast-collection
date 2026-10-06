@@ -19,7 +19,13 @@ const TARGET_PATHS: Record<string, (id: string) => string> = {
 const show = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value))
 
 /** One recorded admin action: when, who, what, on what (linked), with the recorded fields. */
-export function AuditRow({ entry: e, onFilterTarget }: { entry: AuditEntry; onFilterTarget: (id: string) => void }) {
+export function AuditRow({
+  entry: e,
+  onFilterTarget,
+}: {
+  entry: AuditEntry
+  onFilterTarget: (id: string) => void
+}) {
   const path = e.targetType && e.targetId ? TARGET_PATHS[e.targetType]?.(e.targetId) : undefined
   const details = Object.entries(e.meta)
 
@@ -50,11 +56,13 @@ export function AuditRow({ entry: e, onFilterTarget }: { entry: AuditEntry; onFi
           <div className="flex items-center gap-1.5">
             {path ? (
               <Link href={path} className="truncate font-medium hover:underline">
-                {AUDIT.targets[e.targetType ?? ""] ?? e.targetType} · <span className="font-mono">{shortId(e.targetId)}</span>
+                {AUDIT.targets[e.targetType ?? ""] ?? e.targetType} ·{" "}
+                <span className="font-mono">{shortId(e.targetId)}</span>
               </Link>
             ) : (
               <span className="truncate">
-                {AUDIT.targets[e.targetType ?? ""] ?? e.targetType} · <span className="font-mono">{shortId(e.targetId)}</span>
+                {AUDIT.targets[e.targetType ?? ""] ?? e.targetType} ·{" "}
+                <span className="font-mono">{shortId(e.targetId)}</span>
               </span>
             )}
             <button

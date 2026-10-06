@@ -75,7 +75,10 @@ export class LevelEditorController {
         transcription: current.transcription,
         upload: current.upload,
         // The player knows the real length of the audio on screen.
-        durationSec: current.audioUrl === fresh.audioUrl && current.durationSec ? current.durationSec : fresh.durationSec,
+        durationSec:
+          current.audioUrl === fresh.audioUrl && current.durationSec
+            ? current.durationSec
+            : fresh.durationSec,
       })
     }
   }
@@ -100,7 +103,9 @@ export class LevelEditorController {
   /** The player read the audio's length. */
   static setDuration(key: string, seconds: number): void {
     if (!Number.isFinite(seconds) || seconds <= 0) return
-    this.patch(key, (d) => (d.durationSec && Math.abs(d.durationSec - seconds) < 0.01 ? d : { ...d, durationSec: seconds }))
+    this.patch(key, (d) =>
+      d.durationSec && Math.abs(d.durationSec - seconds) < 0.01 ? d : { ...d, durationSec: seconds },
+    )
   }
 
   static setDescription(key: string, description: string): void {
@@ -139,13 +144,18 @@ export class LevelEditorController {
         ToastService.info(LEVEL.audio.compressed(formatBytes(file.size), formatBytes(ready.size)))
       } catch (error) {
         idle()
-        return ToastService.error(LEVEL.audio.compressFailed, error instanceof Error ? error.message : undefined)
+        return ToastService.error(
+          LEVEL.audio.compressFailed,
+          error instanceof Error ? error.message : undefined,
+        )
       }
     }
 
     progress("uploading")(0)
     try {
-      const renamed = new File([ready], `${episodeId.slice(0, 8)}-${level}-${ready.name}`, { type: ready.type })
+      const renamed = new File([ready], `${episodeId.slice(0, 8)}-${level}-${ready.name}`, {
+        type: ready.type,
+      })
       const url = await MediaController.upload(renamed, "podcasts", progress("uploading"))
       idle()
       this.setAudioUrl(key, url)
@@ -162,7 +172,11 @@ export class LevelEditorController {
   static async transcribe(key: string): Promise<void> {
     const d = store().drafts[key]
     if (!d?.audioUrl) return ToastService.error(LEVEL.transcribe.needAudio)
-    if (d.transcription.status === "starting" || d.transcription.status === "queued" || d.transcription.status === "processing")
+    if (
+      d.transcription.status === "starting" ||
+      d.transcription.status === "queued" ||
+      d.transcription.status === "processing"
+    )
       return
     stopPolling(key)
     this.patch(key, (x) => ({ ...x, transcription: { status: "starting" } }))
@@ -172,7 +186,10 @@ export class LevelEditorController {
       this.schedulePoll(key, 2_000)
     } catch (error) {
       const failure = errorCode(error)
-      this.patch(key, (x) => ({ ...x, transcription: { status: "error", error: failure.message || ERRORS[failure.code] } }))
+      this.patch(key, (x) => ({
+        ...x,
+        transcription: { status: "error", error: failure.message || ERRORS[failure.code] },
+      }))
       toastFailure(error, LEVEL.transcribe.failed)
     }
   }
@@ -206,7 +223,10 @@ export class LevelEditorController {
         return
       }
       if (result.status === "error") {
-        this.patch(key, (x) => ({ ...x, transcription: { ...x.transcription, status: "error", error: result.error } }))
+        this.patch(key, (x) => ({
+          ...x,
+          transcription: { ...x.transcription, status: "error", error: result.error },
+        }))
         ToastService.error(LEVEL.transcribe.failed, result.error)
         return
       }
@@ -215,7 +235,10 @@ export class LevelEditorController {
     } catch (error) {
       // A network blip: keep asking, a little slower.
       if (errorCode(error).code === "not_found") {
-        this.patch(key, (x) => ({ ...x, transcription: { ...x.transcription, status: "error", error: ERRORS.not_found } }))
+        this.patch(key, (x) => ({
+          ...x,
+          transcription: { ...x.transcription, status: "error", error: ERRORS.not_found },
+        }))
         return
       }
       this.schedulePoll(key, 8_000)
@@ -229,8 +252,10 @@ export class LevelEditorController {
     if (!d || !result) return
     store().setDraft(key, { ...withChunks(d, chunksFor(result, mode)), mode })
     if (announce && d.chunks.length > 0)
-      ToastService.withAction(LEVEL.transcribe.applied(LEVEL.transcribe.modes[mode]), LEVEL.editor.undo, () =>
-        this.undo(key),
+      ToastService.withAction(
+        LEVEL.transcribe.applied(LEVEL.transcribe.modeHints[mode]),
+        LEVEL.editor.undo,
+        () => this.undo(key),
       )
   }
 

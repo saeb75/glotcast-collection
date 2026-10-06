@@ -14,7 +14,9 @@ export const useLevelEditorStore = create<LevelEditorState>()((set) => ({
   setDraft: (key, draft) => set((s) => ({ drafts: { ...s.drafts, [key]: draft } })),
   removeDrafts: (episodeId) =>
     set((s) => ({
-      drafts: Object.fromEntries(Object.entries(s.drafts).filter(([key]) => !key.startsWith(`${episodeId}:`))),
+      drafts: Object.fromEntries(
+        Object.entries(s.drafts).filter(([key]) => !key.startsWith(`${episodeId}:`)),
+      ),
     })),
   clear: () => set({ drafts: {} }),
 }))

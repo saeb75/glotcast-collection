@@ -26,7 +26,9 @@ export function HeaderTrail() {
   const section = navItemFor(pathname)
   const [, area, id] = pathname.split("/")
   const podcast = usePodcastsStore((s) => (area === "podcasts" && id ? s.details[id]?.data?.name : undefined))
-  const episode = useEpisodesStore((s) => (area === "episodes" && id ? s.details[id]?.data?.title : undefined))
+  const episode = useEpisodesStore((s) =>
+    area === "episodes" && id ? s.details[id]?.data?.title : undefined,
+  )
   const list = useListsStore((s) => (area === "lists" && id ? s.details[id]?.data?.name : undefined))
   const user = useUsersStore((s) => (area === "users" && id ? s.details[id]?.data?.user : undefined))
 
@@ -36,7 +38,11 @@ export function HeaderTrail() {
       ? area === "podcasts"
         ? PODCASTS.editor.newTitle
         : EPISODES.create.title
-      : (podcast ?? episode ?? list ?? (user ? (user.email ?? user.name ?? USERS.guest) : null) ?? shortId(id))
+      : (podcast ??
+        episode ??
+        list ??
+        (user ? (user.email ?? user.name ?? USERS.guest) : null) ??
+        shortId(id))
 
   if (!section) return null
   return (

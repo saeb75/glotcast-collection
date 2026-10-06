@@ -8,7 +8,8 @@ export const LISTS = {
   createTitle: "New list",
   name: "Name",
   slug: "Slug",
-  slugHint: (preview: string) => (preview ? `Leave empty for “${preview}”.` : "Leave empty to make one from the name."),
+  slugHint: (preview: string) =>
+    preview ? `Leave empty for “${preview}”.` : "Leave empty to make one from the name.",
   description: "Description",
   created: "List created",
   saved: "List saved",

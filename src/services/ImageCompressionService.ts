@@ -5,7 +5,10 @@
 
 export type ImageCompression = "none" | "low" | "medium" | "high"
 
-export const IMAGE_PRESETS: Record<Exclude<ImageCompression, "none">, { maxDimension: number; quality: number }> = {
+export const IMAGE_PRESETS: Record<
+  Exclude<ImageCompression, "none">,
+  { maxDimension: number; quality: number }
+> = {
   low: { maxDimension: 1920, quality: 0.9 },
   medium: { maxDimension: 1280, quality: 0.75 },
   high: { maxDimension: 800, quality: 0.6 },

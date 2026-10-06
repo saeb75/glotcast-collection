@@ -62,7 +62,12 @@ export function ListsScreen() {
             ))}
           </div>
         ) : lists.length === 0 ? (
-          <EmptyState icon={ListOrdered} title={LISTS.emptyTitle} description={LISTS.emptyBody} action={newButton} />
+          <EmptyState
+            icon={ListOrdered}
+            title={LISTS.emptyTitle}
+            description={LISTS.emptyBody}
+            action={newButton}
+          />
         ) : (
           <Table>
             <TableHeader>
@@ -75,7 +80,11 @@ export function ListsScreen() {
             </TableHeader>
             <TableBody>
               {lists.map((list) => (
-                <TableRow key={list.id} className="cursor-pointer" onClick={() => router.push(`/lists/${list.id}`)}>
+                <TableRow
+                  key={list.id}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/lists/${list.id}`)}
+                >
                   <TableCell className="pl-4">
                     <Link
                       href={`/lists/${list.id}`}
@@ -89,7 +98,9 @@ export function ListsScreen() {
                       {list.description ? ` · ${list.description}` : ""}
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground tabular-nums">{HOME.episodesCount(list.episodeCount)}</TableCell>
+                  <TableCell className="text-muted-foreground tabular-nums">
+                    {HOME.episodesCount(list.episodeCount)}
+                  </TableCell>
                   <TableCell className="hidden text-muted-foreground md:table-cell">
                     <RelativeTime value={list.updatedAt} />
                   </TableCell>

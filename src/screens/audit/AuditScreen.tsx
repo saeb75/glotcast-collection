@@ -44,7 +44,9 @@ export function AuditScreen() {
       <PageHeader
         title={AUDIT.title}
         description={AUDIT.subtitle}
-        actions={<RefreshButton loading={entry?.loading} onRefresh={() => void AuditController.load(query, true)} />}
+        actions={
+          <RefreshButton loading={entry?.loading} onRefresh={() => void AuditController.load(query, true)} />
+        }
       />
       <TableCard
         toolbar={

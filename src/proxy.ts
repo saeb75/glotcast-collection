@@ -14,7 +14,8 @@ export async function proxy(request: NextRequest) {
   const onLogin = pathname === "/login"
 
   // Not set up: the sign-in page explains what is missing.
-  if (!url || !key) return onLogin ? NextResponse.next() : NextResponse.redirect(new URL("/login", request.url))
+  if (!url || !key)
+    return onLogin ? NextResponse.next() : NextResponse.redirect(new URL("/login", request.url))
 
   let response = NextResponse.next({ request })
   const supabase = createServerClient(url, key, {
@@ -37,7 +38,10 @@ export async function proxy(request: NextRequest) {
 
   const target = signedIn
     ? new URL(safeNext(request.nextUrl.searchParams.get("next")), request.url)
-    : new URL(pathname === "/" ? "/login" : `/login?next=${encodeURIComponent(pathname + search)}`, request.url)
+    : new URL(
+        pathname === "/" ? "/login" : `/login?next=${encodeURIComponent(pathname + search)}`,
+        request.url,
+      )
   const redirect = NextResponse.redirect(target)
   // The refreshed session must reach the browser on the redirect too.
   for (const cookie of response.cookies.getAll()) redirect.cookies.set(cookie)
@@ -50,5 +54,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Everything but Next's assets, static files and /v1 (the dev proxy to the API: large bodies, own auth).
-  matcher: ["/((?!_next/static|_next/image|v1/|favicon.ico|icon.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|v1/|favicon.ico|icon.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt)$).*)",
+  ],
 }

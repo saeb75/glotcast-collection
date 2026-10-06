@@ -2,12 +2,16 @@ import { type EpisodeStatusFilter } from "@/domain/lists"
 
 export const EPISODES = {
   title: "Episodes",
-  subtitle: "Every episode, drafts included. Each one has up to three levels with their own audio and transcript.",
+  subtitle:
+    "Every episode, drafts included. Each one has up to three levels with their own audio and transcript.",
   new: "New episode",
   searchPlaceholder: "Search titles",
   allPodcasts: "All podcasts",
   podcastLabel: "Podcast",
-  statuses: { all: "All", published: "Published", draft: "Drafts" } satisfies Record<EpisodeStatusFilter, string>,
+  statuses: { all: "All", published: "Published", draft: "Drafts" } satisfies Record<
+    EpisodeStatusFilter,
+    string
+  >,
   columns: {
     episode: "Episode",
     podcast: "Podcast",
@@ -80,7 +84,18 @@ export const EPISODES = {
     menu: "More actions",
     delete: "Delete episode",
     podcastDraft: "Its podcast is a draft: nothing of it shows in the app until the podcast is published.",
-    facts: { status: "Status", publishedAt: "Goes live", created: "Created", updated: "Updated", legacy: "Strapi id", id: "ID" },
-    statusLine: { draft: "Draft — not in the app", scheduled: (when: string) => `Scheduled for ${when}`, published: (when: string) => `Live since ${when}` },
+    facts: {
+      status: "Status",
+      publishedAt: "Goes live",
+      created: "Created",
+      updated: "Updated",
+      legacy: "Strapi id",
+      id: "ID",
+    },
+    statusLine: {
+      draft: "Draft — not in the app",
+      scheduled: (when: string) => `Scheduled for ${when}`,
+      published: (when: string) => `Live since ${when}`,
+    },
   },
 }

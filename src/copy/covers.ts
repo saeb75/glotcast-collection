@@ -29,9 +29,15 @@ export const COVERS = {
   prompt: "Prompt",
   promptPlaceholder: "Describe the image, or write it from the transcript.",
   model: "Model",
-  models: { gemini: "Gemini (Nano Banana)", openai: "OpenAI gpt-image-1" } satisfies Record<CoverModel, string>,
+  models: { gemini: "Gemini (Nano Banana)", openai: "OpenAI gpt-image-1" } satisfies Record<
+    CoverModel,
+    string
+  >,
   aspect: "Shape",
-  aspects: { "3:4": "3:4 portrait", "4:3": "4:3 landscape", "1:1": "1:1 square" } satisfies Record<CoverAspect, string>,
+  aspects: { "3:4": "3:4 portrait", "4:3": "4:3 landscape", "1:1": "1:1 square" } satisfies Record<
+    CoverAspect,
+    string
+  >,
   generate: "Generate image",
   generating: "Drawing… (up to a minute)",
   results: "Generated",

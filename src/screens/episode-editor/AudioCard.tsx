@@ -76,7 +76,9 @@ export function AudioCard({ episodeId, level }: { episodeId: string; level: Leve
               >
                 {audioUrl.split("/").pop() || audioUrl}
               </a>
-              <div className="text-xs text-muted-foreground">{duration ? a.duration(formatClock(duration)) : a.noDuration}</div>
+              <div className="text-xs text-muted-foreground">
+                {duration ? a.duration(formatClock(duration)) : a.noDuration}
+              </div>
             </div>
             <CopyButton value={audioUrl} />
             <Button variant="ghost" size="icon-xs" asChild>
@@ -95,23 +97,31 @@ export function AudioCard({ episodeId, level }: { episodeId: string; level: Leve
             className="hidden"
             onChange={(e) => start(e.target.files?.[0])}
           />
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant={audioUrl ? "outline" : "default"} disabled={busy} onClick={() => fileRef.current?.click()}>
-              <Upload />
-              {audioUrl ? a.replace : a.upload}
-            </Button>
-            <OptionSelect
-              label={a.compression}
-              value={compression}
-              options={COMPRESSIONS}
-              labels={a.presets}
-              onChange={setCompression}
-              className="w-56"
+          <Button
+            type="button"
+            className="w-full"
+            variant={audioUrl ? "outline" : "default"}
+            disabled={busy}
+            onClick={() => fileRef.current?.click()}
+          >
+            <Upload />
+            {audioUrl ? a.replace : a.upload}
+          </Button>
+          <OptionSelect
+            label={a.compression}
+            value={compression}
+            options={COMPRESSIONS}
+            labels={a.presets}
+            onChange={setCompression}
+            className="w-full"
+            disabled={busy}
+          />
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Checkbox
+              checked={transcribeAfter}
+              onCheckedChange={(v) => setTranscribeAfter(v === true)}
               disabled={busy}
             />
-          </div>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Checkbox checked={transcribeAfter} onCheckedChange={(v) => setTranscribeAfter(v === true)} disabled={busy} />
             {a.transcribeAfter}
           </label>
           {busy && upload ? (

@@ -42,7 +42,9 @@ export function ProfileCard({ user: u }: { user: UserProfile }) {
           <DetailItem label={f.seen} hint={f.seenHint}>
             {formatRelative(u.lastSeenAt)}
           </DetailItem>
-          {u.legacyStrapiUserId !== null ? <DetailItem label={f.legacy}>#{u.legacyStrapiUserId}</DetailItem> : null}
+          {u.legacyStrapiUserId !== null ? (
+            <DetailItem label={f.legacy}>#{u.legacyStrapiUserId}</DetailItem>
+          ) : null}
         </dl>
       </CardContent>
     </Card>

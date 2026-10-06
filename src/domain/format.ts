@@ -10,7 +10,12 @@ export const formatShare = (part: number, total: number) =>
 
 const dateTime = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" })
 const date = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" })
-const day = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })
+const day = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+})
 const shortDay = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" })
 const weekday = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "UTC" })
 

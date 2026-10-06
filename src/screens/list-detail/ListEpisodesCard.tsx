@@ -24,7 +24,10 @@ export function ListEpisodesCard({ list }: { list: AdminListDetail }) {
   const [picking, setPicking] = useState(false)
   const [saving, setSaving] = useState(false)
   const ids = episodes.map((e) => e.id)
-  const dirty = !sameOrder(ids, list.episodes.map((e) => e.id))
+  const dirty = !sameOrder(
+    ids,
+    list.episodes.map((e) => e.id),
+  )
 
   useUnsavedGuard(dirty)
 

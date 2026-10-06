@@ -20,6 +20,7 @@ export const MEDIA = {
   uploaded: "Image uploaded",
   notImage: "That isn't an image file.",
   failed: "Upload failed",
-  corsHint: "If uploads fail with a network error, the R2 bucket's CORS must allow PUT from this panel's origin.",
+  corsHint:
+    "If uploads fail with a network error, the R2 bucket's CORS must allow PUT from this panel's origin.",
   previewFailed: "The image couldn't be loaded",
 }

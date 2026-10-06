@@ -47,7 +47,10 @@ export function PodcastsScreen() {
         description={PODCASTS.subtitle}
         actions={
           <>
-            <RefreshButton loading={entry?.loading} onRefresh={() => void PodcastsController.load(query, true)} />
+            <RefreshButton
+              loading={entry?.loading}
+              onRefresh={() => void PodcastsController.load(query, true)}
+            />
             {newButton}
           </>
         }
@@ -63,7 +66,12 @@ export function PodcastsScreen() {
         }
         footer={
           data && data.total > 0 ? (
-            <Pager page={query.page} pageSize={PAGE_SIZE} total={data.total} onPage={(page) => setQuery({ ...query, page })} />
+            <Pager
+              page={query.page}
+              pageSize={PAGE_SIZE}
+              total={data.total}
+              onPage={(page) => setQuery({ ...query, page })}
+            />
           ) : undefined
         }
       >

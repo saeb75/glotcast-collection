@@ -56,4 +56,6 @@ export const NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((group) => group.items)
 
 /** The section a path belongs to ("/" only matches itself). */
 export const navItemFor = (pathname: string): NavItem | undefined =>
-  NAV_ITEMS.find((item) => (item.to === "/" ? pathname === "/" : pathname === item.to || pathname.startsWith(`${item.to}/`)))
+  NAV_ITEMS.find((item) =>
+    item.to === "/" ? pathname === "/" : pathname === item.to || pathname.startsWith(`${item.to}/`),
+  )

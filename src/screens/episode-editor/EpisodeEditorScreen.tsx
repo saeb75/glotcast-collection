@@ -90,6 +90,17 @@ export function EpisodeEditorScreen({ id }: { id: string }) {
       </div>
     )
 
+  // The form starts over only when the saved details change (not when a level is saved).
+  const detailsKey = [
+    episode.podcast.id,
+    episode.title,
+    episode.number,
+    episode.description,
+    episode.coverUrl,
+    episode.bannerUrl,
+    episode.isPro,
+  ].join("|")
+
   const statusLine =
     episode.status === "draft"
       ? e.statusLine.draft
@@ -108,7 +119,10 @@ export function EpisodeEditorScreen({ id }: { id: string }) {
         }
         description={
           <span>
-            <Link href={`/podcasts/${episode.podcast.id}`} className="font-medium text-foreground hover:underline">
+            <Link
+              href={`/podcasts/${episode.podcast.id}`}
+              className="font-medium text-foreground hover:underline"
+            >
               {episode.podcast.name}
             </Link>{" "}
             · {statusLine}
@@ -123,15 +137,17 @@ export function EpisodeEditorScreen({ id }: { id: string }) {
         </Alert>
       ) : null}
       <Tabs value={tab} onValueChange={setTab} className="gap-4">
-        <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
-          <TabsTrigger value="details">{e.tabs.details}</TabsTrigger>
+        <TabsList className="max-w-full self-start overflow-x-auto">
+          <TabsTrigger value="details" className="px-3">
+            {e.tabs.details}
+          </TabsTrigger>
           {LEVELS.map((level) => {
             const saved = Boolean(levelOf(episode.levels, level))
             const dirty = dirtyLevels.includes(level)
             return (
               <Tooltip key={level}>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value={level} className="gap-1.5">
+                  <TabsTrigger value={level} className="gap-1.5 px-3">
                     <span
                       aria-hidden
                       className={cn(
@@ -149,11 +165,19 @@ export function EpisodeEditorScreen({ id }: { id: string }) {
               </Tooltip>
             )
           })}
-          <TabsTrigger value="cover">{e.tabs.cover}</TabsTrigger>
+          <TabsTrigger value="cover" className="px-3">
+            {e.tabs.cover}
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="details">
+        {/* Kept mounted (hidden) so unsaved details survive a visit to a level tab. */}
+        <TabsContent value="details" forceMount className="data-[state=inactive]:hidden">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-            <EpisodeForm key={episode.updatedAt} episode={episode} onSaved={() => undefined} onGenerate={() => setTab("cover")} />
+            <EpisodeForm
+              key={detailsKey}
+              episode={episode}
+              onSaved={() => undefined}
+              onGenerate={() => setTab("cover")}
+            />
             <EpisodeFacts episode={episode} />
           </div>
         </TabsContent>

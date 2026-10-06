@@ -61,7 +61,12 @@ export function CategoriesScreen() {
             ))}
           </div>
         ) : categories.length === 0 ? (
-          <EmptyState icon={Tags} title={CATEGORIES.emptyTitle} description={CATEGORIES.emptyBody} action={newButton} />
+          <EmptyState
+            icon={Tags}
+            title={CATEGORIES.emptyTitle}
+            description={CATEGORIES.emptyBody}
+            action={newButton}
+          />
         ) : (
           <Table>
             <TableHeader>

@@ -35,7 +35,9 @@ export function EpisodeFacts({ episode: ep }: { episode: AdminEpisodeDetail }) {
           <DetailItem label={f.status}>
             <StatusBadge status={ep.status} />
           </DetailItem>
-          {ep.publishedAt ? <DetailItem label={f.publishedAt}>{formatDateTime(ep.publishedAt)}</DetailItem> : null}
+          {ep.publishedAt ? (
+            <DetailItem label={f.publishedAt}>{formatDateTime(ep.publishedAt)}</DetailItem>
+          ) : null}
           <DetailItem label={EPISODES.columns.levels}>
             <span className="inline-flex justify-end">
               <LevelBadges levels={ep.levels} />

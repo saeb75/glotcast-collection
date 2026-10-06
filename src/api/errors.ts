@@ -52,7 +52,8 @@ export function errorCode(error: unknown): ApiError {
   if (error instanceof ZodError)
     return new ApiError("unexpected_response", "The API answered in an unexpected shape")
   if (isAxiosError(error)) {
-    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") return new ApiError("timeout", error.message)
+    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT")
+      return new ApiError("timeout", error.message)
     const response = error.response
     if (!response) return new ApiError("offline", error.message)
     const problem = (typeof response.data === "object" && response.data ? response.data : {}) as Problem

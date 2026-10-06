@@ -9,7 +9,8 @@ export function DashboardStats({ dashboard: d }: { dashboard: Dashboard | undefi
   const s = DASHBOARD.stats
   const loading = !d
   const today = d?.dau[d.dau.length - 1]?.count
-  const average = d && d.dau.length ? Math.round(d.dau.reduce((sum, day) => sum + day.count, 0) / d.dau.length) : undefined
+  const average =
+    d && d.dau.length ? Math.round(d.dau.reduce((sum, day) => sum + day.count, 0) / d.dau.length) : undefined
   return (
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <StatCard

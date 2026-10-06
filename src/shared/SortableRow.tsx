@@ -22,10 +22,11 @@ export function SortableRow({
   onRemove?: () => void
   disabled?: boolean
 }) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
-    id,
-    disabled,
-  })
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
+    useSortable({
+      id,
+      disabled,
+    })
 
   return (
     <li
@@ -46,7 +47,9 @@ export function SortableRow({
       >
         <GripVertical className="size-4" />
       </button>
-      <span className="w-6 shrink-0 text-right font-mono text-xs text-muted-foreground tabular-nums">{index + 1}</span>
+      <span className="w-6 shrink-0 text-right font-mono text-xs text-muted-foreground tabular-nums">
+        {index + 1}
+      </span>
       <div className="min-w-0 flex-1">{children}</div>
       {onRemove ? (
         <Button

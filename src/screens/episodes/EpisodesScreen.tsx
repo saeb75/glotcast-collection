@@ -50,7 +50,10 @@ export function EpisodesScreen() {
         description={EPISODES.subtitle}
         actions={
           <>
-            <RefreshButton loading={entry?.loading} onRefresh={() => void EpisodesController.load(query, true)} />
+            <RefreshButton
+              loading={entry?.loading}
+              onRefresh={() => void EpisodesController.load(query, true)}
+            />
             {newButton}
           </>
         }
@@ -59,7 +62,12 @@ export function EpisodesScreen() {
         toolbar={<EpisodesToolbar query={query} searchReset={searchReset} onChange={setFilters} />}
         footer={
           data && data.total > 0 ? (
-            <Pager page={query.page} pageSize={PAGE_SIZE} total={data.total} onPage={(page) => setQuery({ ...query, page })} />
+            <Pager
+              page={query.page}
+              pageSize={PAGE_SIZE}
+              total={data.total}
+              onPage={(page) => setQuery({ ...query, page })}
+            />
           ) : undefined
         }
       >

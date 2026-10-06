@@ -82,7 +82,11 @@ describe("merge, remove, split in a list", () => {
 
 describe("withText", () => {
   it("keeps word timings for a same-length fix and drops them otherwise", () => {
-    expect(withText(timed, "Hello there my friends").words?.[3]).toEqual({ text: "friends", start: 2.4, end: 3 })
+    expect(withText(timed, "Hello there my friends").words?.[3]).toEqual({
+      text: "friends",
+      start: 2.4,
+      end: 3,
+    })
     expect(withText(timed, "Hello friend").words).toBeUndefined()
   })
 })

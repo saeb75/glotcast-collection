@@ -67,7 +67,13 @@ export function TimeControl({
       >
         <Plus className="size-3" />
       </button>
-      <button type="button" className={iconButton} title={playheadLabel} aria-label={playheadLabel} onClick={onPlayhead}>
+      <button
+        type="button"
+        className={iconButton}
+        title={playheadLabel}
+        aria-label={playheadLabel}
+        onClick={onPlayhead}
+      >
         <Crosshair className="size-3" />
       </button>
     </div>

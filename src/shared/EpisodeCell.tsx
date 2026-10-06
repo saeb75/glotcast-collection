@@ -7,7 +7,13 @@ export function EpisodeCell({
   episode,
   link = true,
 }: {
-  episode: { id: string; number: number | null; title: string; coverUrl: string | null; podcast: { name: string } }
+  episode: {
+    id: string
+    number: number | null
+    title: string
+    coverUrl: string | null
+    podcast: { name: string }
+  }
   link?: boolean
 }) {
   const label = episodeLabel(episode)

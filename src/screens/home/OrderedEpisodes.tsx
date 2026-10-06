@@ -16,7 +16,13 @@ import { TableCard } from "@/shared/TableCard"
 const MAX = 30
 
 /** The home slider: episodes in order, shown with their banner. */
-export function OrderedEpisodes({ ids, episodes }: { ids: string[]; episodes: Record<string, AdminEpisode> }) {
+export function OrderedEpisodes({
+  ids,
+  episodes,
+}: {
+  ids: string[]
+  episodes: Record<string, AdminEpisode>
+}) {
   const [picking, setPicking] = useState(false)
 
   return (

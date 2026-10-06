@@ -21,9 +21,17 @@ export function CoverThumb({
   const [failed, setFailed] = useState<string | null>(null)
   const show = url && failed !== url
   return (
-    <div className={cn("w-10 shrink-0 overflow-hidden rounded-md border bg-muted", ASPECTS[aspect], className)}>
+    <div
+      className={cn("w-10 shrink-0 overflow-hidden rounded-md border bg-muted", ASPECTS[aspect], className)}
+    >
       {show ? (
-        <img src={url} alt={alt} loading="lazy" className="size-full object-cover" onError={() => setFailed(url)} />
+        <img
+          src={url}
+          alt={alt}
+          loading="lazy"
+          className="size-full object-cover"
+          onError={() => setFailed(url)}
+        />
       ) : (
         <div className="flex size-full items-center justify-center text-muted-foreground">
           <ImageOff className="size-3.5" />

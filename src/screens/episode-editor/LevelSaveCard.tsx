@@ -32,7 +32,11 @@ export function LevelSaveCard({ episodeId, level }: { episodeId: string; level: 
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           {label}
-          {dirty ? <Badge variant="outline" className="text-warning">{COMMON.unsaved}</Badge> : null}
+          {dirty ? (
+            <Badge variant="outline" className="text-warning">
+              {COMMON.unsaved}
+            </Badge>
+          ) : null}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -53,11 +57,18 @@ export function LevelSaveCard({ episodeId, level }: { episodeId: string; level: 
               ? `${LEVEL.savedAt(formatRelative(draft.saved.updatedAt))} · ${formatClock(draft.saved.durationSec)} · ${LEVEL.transcribe.lines(draft.saved.chunkCount)}`
               : LEVEL.notSaved}
           </div>
-          {dirty && problem && problem !== "busy" ? <div className="text-destructive">{LEVEL.problems[problem]}</div> : null}
+          {dirty && problem && problem !== "busy" ? (
+            <div className="text-destructive">{LEVEL.problems[problem]}</div>
+          ) : null}
         </div>
       </CardContent>
       <CardFooter className="flex-wrap gap-2 border-t">
-        <SaveButton episodeId={episodeId} level={level} disabled={!dirty || problem !== null} saving={draft.saving} />
+        <SaveButton
+          episodeId={episodeId}
+          level={level}
+          disabled={!dirty || problem !== null}
+          saving={draft.saving}
+        />
         {dirty && draft.saved ? (
           <ConfirmDialog
             trigger={
@@ -75,7 +86,11 @@ export function LevelSaveCard({ episodeId, level }: { episodeId: string; level: 
         {draft.saved ? (
           <ConfirmDialog
             trigger={
-              <Button variant="ghost" className="ml-auto text-destructive hover:text-destructive" disabled={draft.saving || draft.deleting}>
+              <Button
+                variant="ghost"
+                className="ml-auto text-destructive hover:text-destructive"
+                disabled={draft.saving || draft.deleting}
+              >
                 {draft.deleting ? <Spinner /> : <Trash2 />}
                 {LEVEL.delete}
               </Button>

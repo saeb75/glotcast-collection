@@ -43,7 +43,10 @@ export function DailyBarChart<T extends { date: string }>({
           content={<ChartTooltipContent labelFormatter={(value) => formatDay(String(value))} />}
         />
         {keys.length > 1 ? (
-          <ChartLegend itemSorter={(item) => keys.indexOf(String(item.dataKey))} content={<ChartLegendContent />} />
+          <ChartLegend
+            itemSorter={(item) => keys.indexOf(String(item.dataKey))}
+            content={<ChartLegendContent />}
+          />
         ) : null}
         {keys.map((key, i) => (
           <Bar

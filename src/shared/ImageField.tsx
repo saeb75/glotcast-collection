@@ -128,7 +128,13 @@ export function ImageField({
             disabled={disabled || busy}
           />
           {onGenerate ? (
-            <Button type="button" variant="outline" size="sm" disabled={disabled || busy} onClick={onGenerate}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={disabled || busy}
+              onClick={onGenerate}
+            >
               <Sparkles />
               {MEDIA.generate}
             </Button>

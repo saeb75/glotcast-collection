@@ -17,7 +17,9 @@ export function LevelBadges({ levels }: { levels: AdminEpisodeLevel[] }) {
               <span
                 className={cn(
                   "inline-flex h-5 min-w-7 items-center justify-center rounded-md border px-1 font-mono text-[10px] font-semibold",
-                  l ? "border-transparent bg-foreground text-background" : "border-dashed text-muted-foreground/60",
+                  l
+                    ? "border-transparent bg-foreground text-background"
+                    : "border-dashed text-muted-foreground/60",
                 )}
               >
                 {LEVEL_SHORT[level]}

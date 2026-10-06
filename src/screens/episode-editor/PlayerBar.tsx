@@ -58,21 +58,27 @@ export function PlayerBar({ episodeId, level }: { episodeId: string; level: Leve
   return (
     <div className="sticky top-14 z-10 -mx-px space-y-1 rounded-t-xl border-b bg-card/95 px-3 py-2 backdrop-blur">
       <div className="flex flex-wrap items-center gap-2">
-        <audio
-          key={url}
-          ref={attach}
-          src={url || undefined}
-          preload="metadata"
-          controls
-          className="h-9 min-w-56 flex-1"
-          onLoadedMetadata={(e) => LevelEditorController.setDuration(key, e.currentTarget.duration)}
-          onDurationChange={(e) => LevelEditorController.setDuration(key, e.currentTarget.duration)}
-          onTimeUpdate={(e) => PlayerController.time(e.currentTarget.currentTime)}
-          onPlay={() => PlayerController.playing(true)}
-          onPause={() => PlayerController.playing(false)}
-          onEnded={() => PlayerController.playing(false)}
-          onError={() => setFailedUrl(url)}
-        />
+        {url ? (
+          <audio
+            key={url}
+            ref={attach}
+            src={url}
+            preload="metadata"
+            controls
+            className="h-9 min-w-56 flex-1"
+            onLoadedMetadata={(e) => LevelEditorController.setDuration(key, e.currentTarget.duration)}
+            onDurationChange={(e) => LevelEditorController.setDuration(key, e.currentTarget.duration)}
+            onTimeUpdate={(e) => PlayerController.time(e.currentTarget.currentTime)}
+            onPlay={() => PlayerController.playing(true)}
+            onPause={() => PlayerController.playing(false)}
+            onEnded={() => PlayerController.playing(false)}
+            onError={() => setFailedUrl(url)}
+          />
+        ) : (
+          <p className="flex h-9 min-w-56 flex-1 items-center rounded-full bg-muted px-4 text-xs text-muted-foreground">
+            {LEVEL.player.noAudio}
+          </p>
+        )}
         <OptionSelect
           label={LEVEL.player.rate}
           value={String(rate) as (typeof RATES)[number]}
@@ -86,10 +92,24 @@ export function PlayerBar({ episodeId, level }: { episodeId: string; level: Leve
           {LEVEL.editor.follow}
         </label>
         <div className="flex items-center">
-          <Button variant="ghost" size="icon-sm" disabled={!canUndo} onClick={() => LevelEditorController.undo(key)} title={LEVEL.editor.undo} aria-label={LEVEL.editor.undo}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={!canUndo}
+            onClick={() => LevelEditorController.undo(key)}
+            title={LEVEL.editor.undo}
+            aria-label={LEVEL.editor.undo}
+          >
             <Undo2 />
           </Button>
-          <Button variant="ghost" size="icon-sm" disabled={!canRedo} onClick={() => LevelEditorController.redo(key)} title={LEVEL.editor.redo} aria-label={LEVEL.editor.redo}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={!canRedo}
+            onClick={() => LevelEditorController.redo(key)}
+            title={LEVEL.editor.redo}
+            aria-label={LEVEL.editor.redo}
+          >
             <Redo2 />
           </Button>
         </div>

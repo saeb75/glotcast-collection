@@ -11,7 +11,12 @@ import { EPISODES } from "@/copy/episodes"
 import { withData } from "@/domain/cache"
 import { formatDateTime } from "@/domain/format"
 import { type EpisodesQuery, episodesKey, episodesRequest } from "@/domain/lists"
-import { type AdminEpisode, type AdminEpisodeDetail, type EpisodeCreateInput, type EpisodeInput } from "@/schemas/admin"
+import {
+  type AdminEpisode,
+  type AdminEpisodeDetail,
+  type EpisodeCreateInput,
+  type EpisodeInput,
+} from "@/schemas/admin"
 import { useEpisodesStore } from "@/stores/useEpisodesStore"
 import { LevelEditorController } from "./LevelEditorController"
 import { loadEntry, loadShown, runAction } from "./load"
@@ -101,7 +106,10 @@ export class EpisodesController {
   }
 
   /** A whole episode came back (create, update, a level saved). */
-  static stored(episode: AdminEpisodeDetail, forceLevels: AdminEpisodeDetail["levels"][number]["level"][] = []): void {
+  static stored(
+    episode: AdminEpisodeDetail,
+    forceLevels: AdminEpisodeDetail["levels"][number]["level"][] = [],
+  ): void {
     store().setDetail(episode.id, withData(episode))
     store().dropPages()
     LevelEditorController.sync(episode, forceLevels)

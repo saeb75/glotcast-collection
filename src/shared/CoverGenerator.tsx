@@ -16,10 +16,20 @@ import { NEW_COVER_SESSION, useCoverStore } from "@/stores/useCoverStore"
 import { CopyButton } from "./CopyButton"
 import { OptionSelect } from "./OptionSelect"
 
-const STYLES = ["vibrant-gradient", "cinematic-photo", "minimal-editorial", "risograph", "bold-pop"] as const satisfies readonly CoverStyle[]
+const STYLES = [
+  "vibrant-gradient",
+  "cinematic-photo",
+  "minimal-editorial",
+  "risograph",
+  "bold-pop",
+] as const satisfies readonly CoverStyle[]
 const MODELS = ["gemini", "openai"] as const satisfies readonly CoverModel[]
 const ASPECTS = ["3:4", "4:3", "1:1"] as const satisfies readonly CoverAspect[]
-const ASPECT_CLASS: Record<CoverAspect, string> = { "3:4": "aspect-[3/4]", "4:3": "aspect-[4/3]", "1:1": "aspect-square" }
+const ASPECT_CLASS: Record<CoverAspect, string> = {
+  "3:4": "aspect-[3/4]",
+  "4:3": "aspect-[4/3]",
+  "1:1": "aspect-square",
+}
 
 export interface CoverTextSource {
   id: string
@@ -111,7 +121,12 @@ export function CoverGenerator({
               variant="outline"
               disabled={!source || session.writing}
               onClick={() =>
-                source && void CoverController.writePrompt(sessionKey, { podcastName, episodeTitle: title, text: source.text })
+                source &&
+                void CoverController.writePrompt(sessionKey, {
+                  podcastName,
+                  episodeTitle: title,
+                  text: source.text,
+                })
               }
             >
               {session.writing ? <Spinner /> : <WandSparkles />}

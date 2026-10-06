@@ -38,7 +38,11 @@ export function PodcastEditorScreen({ id }: { id: string | null }) {
   if (!id)
     return (
       <>
-        <PageHeader title={PODCASTS.editor.newTitle} description={PODCASTS.editor.newSubtitle} actions={back} />
+        <PageHeader
+          title={PODCASTS.editor.newTitle}
+          description={PODCASTS.editor.newSubtitle}
+          actions={back}
+        />
         <div className="max-w-3xl">
           <PodcastForm podcast={null} onSaved={(p) => router.replace(`/podcasts/${p.id}`)} />
         </div>

@@ -38,7 +38,11 @@ export function PanelLayout({ children }: { children: ReactNode }) {
   if (access === "failed")
     return (
       <div className="mx-auto flex min-h-svh max-w-md flex-col justify-center p-6">
-        <ErrorState title={AUTH.accessFailed} message={accessError} onRetry={() => void AuthController.checkAccess()} />
+        <ErrorState
+          title={AUTH.accessFailed}
+          message={accessError}
+          onRetry={() => void AuthController.checkAccess()}
+        />
       </div>
     )
   if (access !== "granted") return <SplashScreen label={AUTH.checking} />
@@ -49,7 +53,9 @@ export function PanelLayout({ children }: { children: ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 p-4 md:p-6 lg:p-8">{children}</main>
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 p-4 md:p-6 lg:p-8">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   )

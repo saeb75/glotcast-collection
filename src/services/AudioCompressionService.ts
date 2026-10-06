@@ -5,7 +5,10 @@
 
 export type AudioCompression = "none" | "low" | "medium" | "high"
 
-export const AUDIO_PRESETS: Record<Exclude<AudioCompression, "none">, { bitrate: number; sampleRate: number }> = {
+export const AUDIO_PRESETS: Record<
+  Exclude<AudioCompression, "none">,
+  { bitrate: number; sampleRate: number }
+> = {
   low: { bitrate: 128, sampleRate: 44100 },
   medium: { bitrate: 64, sampleRate: 22050 },
   high: { bitrate: 32, sampleRate: 16000 },
@@ -58,7 +61,8 @@ export class AudioCompressionService {
 
     const data = await file.arrayBuffer()
     const Ctx =
-      window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
     const ctx = new Ctx()
     let decoded: AudioBuffer
     try {
@@ -68,7 +72,8 @@ export class AudioCompressionService {
     }
 
     const mono = downmixToMono(decoded)
-    const resampled = decoded.sampleRate === sampleRate ? mono : linearResample(mono, decoded.sampleRate, sampleRate)
+    const resampled =
+      decoded.sampleRate === sampleRate ? mono : linearResample(mono, decoded.sampleRate, sampleRate)
     const pcm = floatToInt16(resampled)
 
     const encoder = new Mp3Encoder(1, sampleRate, bitrate)

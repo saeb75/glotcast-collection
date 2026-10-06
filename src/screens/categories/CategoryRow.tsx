@@ -15,7 +15,9 @@ import { RelativeTime } from "@/shared/RelativeTime"
 export function CategoryRow({ category: c, onEdit }: { category: AdminCategory; onEdit: () => void }) {
   return (
     <TableRow className="cursor-pointer" onClick={onEdit}>
-      <TableCell className="w-16 pl-4 font-mono text-xs text-muted-foreground tabular-nums">{c.position}</TableCell>
+      <TableCell className="w-16 pl-4 font-mono text-xs text-muted-foreground tabular-nums">
+        {c.position}
+      </TableCell>
       <TableCell>
         <div className="flex items-center gap-3">
           <CoverThumb url={c.coverUrl} alt="" className="w-9" />
@@ -25,7 +27,9 @@ export function CategoryRow({ category: c, onEdit }: { category: AdminCategory; 
           </div>
         </div>
       </TableCell>
-      <TableCell className="hidden text-muted-foreground tabular-nums sm:table-cell">{c.podcastCount}</TableCell>
+      <TableCell className="hidden text-muted-foreground tabular-nums sm:table-cell">
+        {c.podcastCount}
+      </TableCell>
       <TableCell className="hidden text-muted-foreground md:table-cell">
         <RelativeTime value={c.updatedAt} />
       </TableCell>
@@ -36,7 +40,12 @@ export function CategoryRow({ category: c, onEdit }: { category: AdminCategory; 
           </Button>
           <ConfirmDialog
             trigger={
-              <Button variant="ghost" size="icon-sm" aria-label={COMMON.delete} className="hover:text-destructive">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={COMMON.delete}
+                className="hover:text-destructive"
+              >
                 <Trash2 />
               </Button>
             }

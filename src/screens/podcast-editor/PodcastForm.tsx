@@ -3,7 +3,14 @@
 import { type FormEvent, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
@@ -32,7 +39,13 @@ const initialValues = (p: AdminPodcast | null): Values => ({
 })
 
 /** Create or edit a podcast: name, slug, description, categories, cover, published. ⌘S saves. */
-export function PodcastForm({ podcast, onSaved }: { podcast: AdminPodcast | null; onSaved: (p: AdminPodcast) => void }) {
+export function PodcastForm({
+  podcast,
+  onSaved,
+}: {
+  podcast: AdminPodcast | null
+  onSaved: (p: AdminPodcast) => void
+}) {
   const [initial] = useState(() => initialValues(podcast))
   const [values, setValues] = useState(initial)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -180,7 +193,11 @@ export function PodcastForm({ podcast, onSaved }: { podcast: AdminPodcast | null
         podcastName={values.name}
         title={values.name}
         hint={COVERS.podcastHint}
-        sources={values.description.trim() ? [{ id: "description", label: e.description, text: values.description }] : []}
+        sources={
+          values.description.trim()
+            ? [{ id: "description", label: e.description, text: values.description }]
+            : []
+        }
         emptyHint={COVERS.noDescription}
         actions={[
           {

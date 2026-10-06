@@ -53,7 +53,8 @@ export const TranscriptLine = memo(function TranscriptLine({
   const fresh = nextSpeaker(known)
   const blocking = issues?.some((i) => i.blocking)
 
-  const edit = (change: (chunks: TranscriptChunk[]) => TranscriptChunk[]) => LevelEditorController.edit(draftKey, change)
+  const edit = (change: (chunks: TranscriptChunk[]) => TranscriptChunk[]) =>
+    LevelEditorController.edit(draftKey, change)
 
   /** The textarea's text, if it differs from the line (typed, not committed yet). */
   const typed = () => {
@@ -87,7 +88,7 @@ export const TranscriptLine = memo(function TranscriptLine({
         blocking && "border-destructive/60",
       )}
     >
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
         <button
           type="button"
           className="inline-flex h-7 items-center gap-1.5 rounded-md px-1.5 font-mono text-xs text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
@@ -100,8 +101,10 @@ export const TranscriptLine = memo(function TranscriptLine({
         <select
           aria-label={e.speaker}
           value={chunk.speaker ?? ""}
-          onChange={(ev) => edit((chunks) => replaceAt(chunks, index, withSpeaker(chunk, ev.target.value || null)))}
-          className="h-7 rounded-md border border-input bg-transparent px-1.5 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-input/30"
+          onChange={(ev) =>
+            edit((chunks) => replaceAt(chunks, index, withSpeaker(chunk, ev.target.value || null)))
+          }
+          className="h-7 w-14 rounded-md border border-input bg-transparent px-1 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-input/30"
         >
           <option value="">{e.noSpeaker}</option>
           {known.map((s) => (
@@ -126,11 +129,13 @@ export const TranscriptLine = memo(function TranscriptLine({
           onPlayhead={() => setTime("end", PlayerController.now())}
           playheadLabel={e.setEnd}
         />
-        <span className="hidden text-[11px] text-muted-foreground tabular-nums sm:inline">
+        <span className="hidden text-[11px] text-muted-foreground tabular-nums lg:inline">
           {(chunk.end - chunk.start).toFixed(1)} s
         </span>
         {chunk.words?.length ? (
-          <span className="hidden rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground md:inline">{e.words}</span>
+          <span className="hidden rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground 2xl:inline">
+            {e.words}
+          </span>
         ) : null}
         {issues?.map((issue) => (
           <span
@@ -144,7 +149,13 @@ export const TranscriptLine = memo(function TranscriptLine({
           </span>
         ))}
         <div className="ml-auto flex items-center gap-0.5 opacity-50 transition-opacity group-focus-within/line:opacity-100 group-hover/line:opacity-100">
-          <button type="button" className={actionButton} title={`${e.split} (⌘↵)`} aria-label={e.split} onClick={split}>
+          <button
+            type="button"
+            className={actionButton}
+            title={`${e.split} (⌘↵)`}
+            aria-label={e.split}
+            onClick={split}
+          >
             <Scissors className="size-3.5" />
           </button>
           <button
@@ -178,7 +189,7 @@ export const TranscriptLine = memo(function TranscriptLine({
         rows={1}
         spellCheck
         aria-label={`${index + 1}`}
-        className="mt-1 block w-full resize-none rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm leading-relaxed outline-none [field-sizing:content] hover:border-input focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+        className="mt-1 block [field-sizing:content] w-full resize-none rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm leading-relaxed outline-none hover:border-input focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
         onBlur={commitText}
         onKeyDown={(ev) => {
           if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) {

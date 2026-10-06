@@ -33,7 +33,10 @@ export const USERS = {
     },
     registered: "Registered",
     minutes: (n: number) => `${n} min`,
-    motivations: { career: "Career", travel: "Travel", exams: "Exams", fun: "Fun", other: "Other" } as Record<string, string>,
+    motivations: { career: "Career", travel: "Travel", exams: "Exams", fun: "Fun", other: "Other" } as Record<
+      string,
+      string
+    >,
     stats: {
       streak: "Streak",
       streakHint: (best: number) => `Best ${best} ${best === 1 ? "day" : "days"}`,
@@ -55,7 +58,8 @@ export const USERS = {
     granted: "Pro granted",
     revoked: "Pro removed",
     revokeTitle: "Remove Pro access?",
-    revokeBody: (who: string) => `${who} loses backend Pro right away (a store subscription is not affected).`,
+    revokeBody: (who: string) =>
+      `${who} loses backend Pro right away (a store subscription is not affected).`,
     revoke: "Remove Pro",
     auditNote: "Opening this page is recorded in the audit log.",
   },

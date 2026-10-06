@@ -74,7 +74,11 @@ export function ConfirmDialog({
         {children}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>{COMMON.cancel}</AlertDialogCancel>
-          <Button variant={destructive ? "destructive" : "default"} disabled={busy} onClick={() => void confirm()}>
+          <Button
+            variant={destructive ? "destructive" : "default"}
+            disabled={busy}
+            onClick={() => void confirm()}
+          >
             {busy ? <Spinner /> : null}
             {confirmLabel}
           </Button>

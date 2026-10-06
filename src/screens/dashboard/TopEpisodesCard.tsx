@@ -30,12 +30,20 @@ export function TopEpisodesCard({ episodes }: { episodes: TopEpisode[] | undefin
                 className="flex items-center gap-3 px-4 py-2.5 outline-none hover:bg-muted/40 focus-visible:bg-muted/40"
               >
                 <span className="w-4 text-right font-mono text-xs text-muted-foreground">{i + 1}</span>
-                <CoverThumb url={episode.coverUrl ?? episode.podcast.coverUrl} alt="" aspect="portrait" className="w-8" />
+                <CoverThumb
+                  url={episode.coverUrl ?? episode.podcast.coverUrl}
+                  alt=""
+                  aspect="portrait"
+                  className="w-8"
+                />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{episodeLabel(episode)}</div>
                   <div className="truncate text-xs text-muted-foreground">{episode.podcast.name}</div>
                   <div className="mt-1 h-1 rounded-full bg-muted">
-                    <div className="h-1 rounded-full bg-chart-1" style={{ width: `${(listeners / max) * 100}%` }} />
+                    <div
+                      className="h-1 rounded-full bg-chart-1"
+                      style={{ width: `${(listeners / max) * 100}%` }}
+                    />
                   </div>
                 </div>
                 <span className="shrink-0 text-xs text-muted-foreground tabular-nums">

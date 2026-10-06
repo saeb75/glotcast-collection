@@ -11,7 +11,9 @@ export function StatusBadge({ status }: { status: PublishStatus }) {
   return (
     <Badge
       variant={status === "published" ? "secondary" : "outline"}
-      className={status === "published" ? "text-positive" : status === "scheduled" ? "text-warning" : undefined}
+      className={
+        status === "published" ? "text-positive" : status === "scheduled" ? "text-warning" : undefined
+      }
     >
       <Icon data-icon="inline-start" />
       {STATUS_LABELS[status]}

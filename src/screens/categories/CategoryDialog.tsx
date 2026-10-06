@@ -2,7 +2,14 @@
 
 import { type FormEvent, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
@@ -39,7 +46,13 @@ export function CategoryDialog({
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    const parsed = categoryFormSchema.safeParse({ name, slug, description, coverUrl, position: numberOrNull(position) })
+    const parsed = categoryFormSchema.safeParse({
+      name,
+      slug,
+      description,
+      coverUrl,
+      position: numberOrNull(position),
+    })
     if (!parsed.success) return setErrors(fieldErrors(parsed.error))
     const v = parsed.data
     const input: CategoryInput & { name: string } = {
@@ -89,7 +102,11 @@ export function CategoryDialog({
                   aria-invalid={errors.slug ? true : undefined}
                   onChange={(e) => setSlug(e.target.value.toLowerCase())}
                 />
-                {errors.slug ? <FieldError>{errors.slug}</FieldError> : <FieldDescription>{c.slugHint(slugify(name))}</FieldDescription>}
+                {errors.slug ? (
+                  <FieldError>{errors.slug}</FieldError>
+                ) : (
+                  <FieldDescription>{c.slugHint(slugify(name))}</FieldDescription>
+                )}
               </Field>
               <Field data-invalid={errors.position ? true : undefined}>
                 <FieldLabel htmlFor="category-position">{c.position}</FieldLabel>

@@ -1,5 +1,11 @@
 /** One level being edited in the episode editor: what is saved, what is on screen, and what the save sends. */
-import { type AdminEpisodeLevelDetail, type Level, type LevelInput, type TranscriptChunk, type Transcription } from "@/schemas/admin"
+import {
+  type AdminEpisodeLevelDetail,
+  type Level,
+  type LevelInput,
+  type TranscriptChunk,
+  type Transcription,
+} from "@/schemas/admin"
 import { type ChunkMode, transcriptIssues } from "./transcript"
 
 export type UploadPhase = "idle" | "compressing" | "uploading"

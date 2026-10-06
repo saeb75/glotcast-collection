@@ -36,7 +36,12 @@ export function FeatureAccessCard({ user }: { user: UserProfile }) {
           <span className="text-sm font-medium">{user.featureAccess ? d.accessOn : d.accessOff}</span>
           <span className="flex items-center gap-2">
             {saving ? <Spinner /> : null}
-            <Switch checked={user.featureAccess} disabled={saving} onCheckedChange={toggle} aria-label={d.access} />
+            <Switch
+              checked={user.featureAccess}
+              disabled={saving}
+              onCheckedChange={toggle}
+              aria-label={d.access}
+            />
           </span>
         </label>
       </CardContent>

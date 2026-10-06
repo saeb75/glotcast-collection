@@ -56,7 +56,10 @@ export class PodcastsController {
   }
 
   /** Creates (no id) or updates the podcast; the saved podcast, or undefined when it failed. */
-  static async save(id: string | null, input: PodcastInput & { name: string }): Promise<AdminPodcast | undefined> {
+  static async save(
+    id: string | null,
+    input: PodcastInput & { name: string },
+  ): Promise<AdminPodcast | undefined> {
     const saved = await runAction(
       () => (id ? updatePodcast(id, input) : createPodcast(input)),
       id ? PODCASTS.editor.saved : PODCASTS.editor.created,

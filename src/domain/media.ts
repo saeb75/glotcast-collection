@@ -35,7 +35,13 @@ export function contentTypeOf(file: { type: string; name: string }): string {
 export function safeFileName(name: string): string {
   const dot = name.lastIndexOf(".")
   const stem = dot > 0 ? name.slice(0, dot) : name
-  const ext = dot > 0 ? name.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, "") : ""
+  const ext =
+    dot > 0
+      ? name
+          .slice(dot + 1)
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+      : ""
   const clean =
     stem
       .normalize("NFKD")

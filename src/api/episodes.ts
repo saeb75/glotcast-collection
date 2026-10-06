@@ -29,7 +29,9 @@ export async function createEpisode(body: EpisodeCreateInput) {
 }
 
 export async function updateEpisode(id: string, body: EpisodeInput) {
-  return episodeDetailSchema.parse((await api.patch(`/v1/admin/episodes/${id}`, body, { timeout: 60_000 })).data)
+  return episodeDetailSchema.parse(
+    (await api.patch(`/v1/admin/episodes/${id}`, body, { timeout: 60_000 })).data,
+  )
 }
 
 export async function deleteEpisode(id: string) {

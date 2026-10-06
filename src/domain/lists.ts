@@ -16,7 +16,11 @@ export const parsePodcasts = (params: URLSearchParams): PodcastsQuery => ({
 })
 export const podcastsParams = (q: PodcastsQuery) => writeParams({ ...q }, { page: 1 })
 export const podcastsKey = (q: PodcastsQuery) => keyOf(q.q, q.page)
-export const podcastsRequest = (q: PodcastsQuery) => ({ q: q.q || undefined, page: q.page, pageSize: PAGE_SIZE })
+export const podcastsRequest = (q: PodcastsQuery) => ({
+  q: q.q || undefined,
+  page: q.page,
+  pageSize: PAGE_SIZE,
+})
 
 // Episodes
 export const EPISODE_STATUSES = ["all", "published", "draft"] as const
@@ -51,7 +55,10 @@ export interface UsersQuery {
   q: string
   page: number
 }
-export const parseUsers = (params: URLSearchParams): UsersQuery => ({ q: text(params, "q"), page: readPage(params) })
+export const parseUsers = (params: URLSearchParams): UsersQuery => ({
+  q: text(params, "q"),
+  page: readPage(params),
+})
 export const usersParams = (q: UsersQuery) => writeParams({ ...q }, { page: 1 })
 export const usersKey = (q: UsersQuery) => keyOf(q.q, q.page)
 export const usersRequest = (q: UsersQuery) => ({ q: q.q || undefined, page: q.page, pageSize: PAGE_SIZE })

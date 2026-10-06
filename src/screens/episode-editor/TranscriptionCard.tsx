@@ -27,7 +27,13 @@ export function TranscriptionCard({ episodeId, level }: { episodeId: string; lev
   const modes = availableModes(t?.result)
 
   const label =
-    t?.status === "starting" ? c.starting : t?.status === "queued" ? c.queued : t?.status === "processing" ? c.processing : null
+    t?.status === "starting"
+      ? c.starting
+      : t?.status === "queued"
+        ? c.queued
+        : t?.status === "processing"
+          ? c.processing
+          : null
 
   return (
     <Card>
@@ -74,7 +80,12 @@ export function TranscriptionCard({ episodeId, level }: { episodeId: string; lev
               className="w-full"
             >
               {modes.map((m) => (
-                <ToggleGroupItem key={m} value={m} className="flex-1 flex-col gap-0 py-5" title={c.modeHints[m]}>
+                <ToggleGroupItem
+                  key={m}
+                  value={m}
+                  className="flex-1 flex-col gap-0 py-5"
+                  title={c.modeHints[m]}
+                >
                   <span>{c.modes[m]}</span>
                   <span className="text-[11px] font-normal text-muted-foreground">
                     {c.lines(chunksFor(t.result!, m).length)}

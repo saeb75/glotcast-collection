@@ -17,7 +17,9 @@ export function CoverTab({ episode }: { episode: AdminEpisodeDetail }) {
   const drafts = useLevelEditorStore((s) => s.drafts)
   const sources = LEVELS.flatMap((level) => {
     const chunks = drafts[draftKey(episode.id, level)]?.chunks ?? []
-    return chunks.length ? [{ id: level, label: COVERS.sourceLevel(LEVEL_LABELS[level]), text: plainText(chunks) }] : []
+    return chunks.length
+      ? [{ id: level, label: COVERS.sourceLevel(LEVEL_LABELS[level]), text: plainText(chunks) }]
+      : []
   })
   const sessionKey = `episode:${episode.id}`
 
@@ -42,12 +44,21 @@ export function CoverTab({ episode }: { episode: AdminEpisodeDetail }) {
         actions={[
           {
             label: COVERS.useAsCover,
-            onUse: (url) => EpisodesController.update(episode.id, { coverUrl: url }, COVERS.used(EPISODES.form.cover.toLowerCase())),
+            onUse: (url) =>
+              EpisodesController.update(
+                episode.id,
+                { coverUrl: url },
+                COVERS.used(EPISODES.form.cover.toLowerCase()),
+              ),
           },
           {
             label: COVERS.useAsBanner,
             onUse: (url) =>
-              EpisodesController.update(episode.id, { bannerUrl: url }, COVERS.used(EPISODES.form.banner.toLowerCase())),
+              EpisodesController.update(
+                episode.id,
+                { bannerUrl: url },
+                COVERS.used(EPISODES.form.banner.toLowerCase()),
+              ),
           },
         ]}
       />

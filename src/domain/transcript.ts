@@ -16,7 +16,8 @@ const tokens = (text: string) => text.trim().split(/\s+/).filter(Boolean)
 
 /** The grouping of a finished transcription the admin picked. */
 export function chunksFor(result: Transcription, mode: ChunkMode): TranscriptChunk[] {
-  const chunks = mode === "utterance" ? result.utterances : mode === "sentence" ? result.sentences : result.paragraphs
+  const chunks =
+    mode === "utterance" ? result.utterances : mode === "sentence" ? result.sentences : result.paragraphs
   return (chunks ?? []).map((c) => ({ ...c, speaker: c.speaker ?? null }))
 }
 
@@ -56,7 +57,11 @@ function splitPoint(text: string, at: number | undefined): number {
     const middle = text.length / 2
     let best = -1
     for (let i = 1; i < text.length; i++)
-      if (/\s/.test(text[i]!) && !/\s/.test(text[i - 1]!) && (best < 0 || Math.abs(i - middle) < Math.abs(best - middle)))
+      if (
+        /\s/.test(text[i]!) &&
+        !/\s/.test(text[i - 1]!) &&
+        (best < 0 || Math.abs(i - middle) < Math.abs(best - middle))
+      )
         best = i
     return best
   }

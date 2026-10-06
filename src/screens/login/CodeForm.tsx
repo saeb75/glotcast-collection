@@ -48,7 +48,13 @@ export function CodeForm() {
           {AUTH.verify}
         </Button>
         <div className="flex items-center justify-between">
-          <Button type="button" variant="link" size="sm" className="px-0" onClick={() => AuthController.changeEmail()}>
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            className="px-0"
+            onClick={() => AuthController.changeEmail()}
+          >
             {AUTH.otherEmail}
           </Button>
           <Button

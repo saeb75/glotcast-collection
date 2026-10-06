@@ -21,7 +21,10 @@ export function ContentCard({ episodes }: { episodes: Dashboard["episodes"] | un
         ) : (
           <>
             <div className="flex h-2.5 overflow-hidden rounded-full bg-muted">
-              <div className="bg-chart-1" style={{ width: total ? `${(episodes.published / total) * 100}%` : 0 }} />
+              <div
+                className="bg-chart-1"
+                style={{ width: total ? `${(episodes.published / total) * 100}%` : 0 }}
+              />
             </div>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div>
@@ -31,7 +34,9 @@ export function ContentCard({ episodes }: { episodes: Dashboard["episodes"] | un
                 </dt>
                 <dd className="text-lg font-semibold tabular-nums">
                   {formatCount(episodes.published)}{" "}
-                  <span className="text-xs font-normal text-muted-foreground">{formatShare(episodes.published, total)}</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {formatShare(episodes.published, total)}
+                  </span>
                 </dd>
               </div>
               <div>
@@ -41,7 +46,9 @@ export function ContentCard({ episodes }: { episodes: Dashboard["episodes"] | un
                 </dt>
                 <dd className="text-lg font-semibold tabular-nums">
                   {formatCount(episodes.drafts)}{" "}
-                  <span className="text-xs font-normal text-muted-foreground">{formatShare(episodes.drafts, total)}</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {formatShare(episodes.drafts, total)}
+                  </span>
                 </dd>
               </div>
             </dl>

@@ -47,8 +47,11 @@ export const LEVEL = {
     elapsed: (s: string) => `${s} elapsed`,
     replaceTitle: "Replace the transcript?",
     replaceBody: "The lines on screen are replaced by the new transcription (Undo brings them back).",
-    applied: (mode: string) => `Transcript replaced with ${mode.toLowerCase()} lines`,
-    modes: { utterance: "Utterances", sentence: "Sentences", paragraph: "Paragraphs" } satisfies Record<ChunkMode, string>,
+    applied: (hint: string) => `Transcript replaced — ${hint.toLowerCase()}`,
+    modes: { utterance: "Utterances", sentence: "Sentences", paragraph: "Paragraphs" } satisfies Record<
+      ChunkMode,
+      string
+    >,
     modeHints: {
       utterance: "One line per speaker turn",
       sentence: "One line per sentence",
@@ -111,5 +114,6 @@ export const LEVEL = {
   player: {
     title: "Preview",
     rate: "Speed",
+    noAudio: "The preview plays once the level has audio.",
   },
 }

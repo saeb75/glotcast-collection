@@ -74,7 +74,11 @@ export function UserDetailScreen({ id }: { id: string }) {
       <PageHeader
         title={
           <span className="flex items-center gap-3">
-            <UserAvatar name={user.isAnonymous ? null : (user.name ?? user.email)} imageUrl={user.avatarUrl} size="lg" />
+            <UserAvatar
+              name={user.isAnonymous ? null : (user.name ?? user.email)}
+              imageUrl={user.avatarUrl}
+              size="lg"
+            />
             <span className="min-w-0 truncate">{user.email ?? user.name ?? USERS.guest}</span>
           </span>
         }
@@ -89,7 +93,10 @@ export function UserDetailScreen({ id }: { id: string }) {
         actions={
           <>
             {back}
-            <RefreshButton loading={entry?.loading} onRefresh={() => void UsersController.loadUser(id, true)} />
+            <RefreshButton
+              loading={entry?.loading}
+              onRefresh={() => void UsersController.loadUser(id, true)}
+            />
           </>
         }
       />

@@ -40,7 +40,9 @@ export function TranscriptEditor({ episodeId, level }: { episodeId: string; leve
 
   useEffect(() => {
     if (!follow || !playing || active < 0) return
-    listRef.current?.querySelector(`[data-line="${active}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" })
+    listRef.current
+      ?.querySelector(`[data-line="${active}"]`)
+      ?.scrollIntoView({ block: "center", behavior: "smooth" })
   }, [active, follow, playing])
 
   const show = (index: number) => {
@@ -55,7 +57,9 @@ export function TranscriptEditor({ episodeId, level }: { episodeId: string; leve
       <CardHeader className="border-b py-3">
         <CardTitle className="flex items-center gap-2">
           {LEVEL.editor.title}
-          <span className="text-sm font-normal text-muted-foreground">{LEVEL.transcribe.lines(chunks.length)}</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            {LEVEL.transcribe.lines(chunks.length)}
+          </span>
         </CardTitle>
         <CardDescription>{LEVEL.editor.hint}</CardDescription>
         <p className="text-[11px] text-muted-foreground">{LEVEL.editor.shortcuts}</p>
@@ -63,7 +67,12 @@ export function TranscriptEditor({ episodeId, level }: { episodeId: string; leve
           <div className="mt-1 flex items-center gap-2 text-xs text-warning">
             <TriangleAlert className="size-3.5" />
             {LEVEL.editor.issues(new Set(issues.map((i) => i.index)).size)}
-            <Button variant="link" size="xs" className="h-auto px-0 text-xs" onClick={() => show(firstProblem.index)}>
+            <Button
+              variant="link"
+              size="xs"
+              className="h-auto px-0 text-xs"
+              onClick={() => show(firstProblem.index)}
+            >
               {LEVEL.editor.jump}
             </Button>
           </div>

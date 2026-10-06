@@ -10,7 +10,8 @@ export function move<T>(items: readonly T[], from: number, to: number): T[] {
 }
 
 /** Appended once (an id already there stays where it is). */
-export const addUnique = <T>(items: readonly T[], item: T): T[] => (items.includes(item) ? [...items] : [...items, item])
+export const addUnique = <T>(items: readonly T[], item: T): T[] =>
+  items.includes(item) ? [...items] : [...items, item]
 
 export const without = <T>(items: readonly T[], item: T): T[] => items.filter((i) => i !== item)
 

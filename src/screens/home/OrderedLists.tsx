@@ -4,7 +4,14 @@ import { Plus } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { HomeConfigController, type HomeSection } from "@/controllers/HomeConfigController"
 import { HOME } from "@/copy/home"
@@ -82,10 +89,15 @@ export function OrderedLists({
             const list = byId.get(id)
             return list ? (
               <div className="flex items-center gap-3">
-                <Link href={`/lists/${id}`} className="min-w-0 flex-1 truncate text-sm font-medium hover:underline">
+                <Link
+                  href={`/lists/${id}`}
+                  className="min-w-0 flex-1 truncate text-sm font-medium hover:underline"
+                >
                   {list.name}
                 </Link>
-                <span className="shrink-0 text-xs text-muted-foreground">{HOME.episodesCount(list.episodeCount)}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {HOME.episodesCount(list.episodeCount)}
+                </span>
               </div>
             ) : (
               <div className="text-sm text-muted-foreground">

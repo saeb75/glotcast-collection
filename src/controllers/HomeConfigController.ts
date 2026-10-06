@@ -19,8 +19,7 @@ async function findEpisodes(ids: string[]): Promise<AdminEpisode[]> {
   const found: AdminEpisode[] = []
   for (let page = 1; missing.size > 0 && page <= 30; page++) {
     const result = await listEpisodes({ page, pageSize: 50 })
-    for (const e of result.items)
-      if (missing.delete(e.id)) found.push(e)
+    for (const e of result.items) if (missing.delete(e.id)) found.push(e)
     if (!result.hasMore) break
   }
   return found
@@ -29,10 +28,10 @@ async function findEpisodes(ids: string[]): Promise<AdminEpisode[]> {
 export const isHomeDirty = (draft: HomeConfig | undefined, saved: HomeConfig | undefined) =>
   Boolean(
     draft &&
-      saved &&
-      (!sameOrder(draft.sliderEpisodeIds, saved.sliderEpisodeIds) ||
-        !sameOrder(draft.homeListIds, saved.homeListIds) ||
-        !sameOrder(draft.exploreListIds, saved.exploreListIds)),
+    saved &&
+    (!sameOrder(draft.sliderEpisodeIds, saved.sliderEpisodeIds) ||
+      !sameOrder(draft.homeListIds, saved.homeListIds) ||
+      !sameOrder(draft.exploreListIds, saved.exploreListIds)),
   )
 
 export class HomeConfigController {

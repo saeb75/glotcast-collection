@@ -29,7 +29,9 @@ export function DashboardScreen() {
       <PageHeader
         title={DASHBOARD.title}
         description={DASHBOARD.subtitle}
-        actions={<RefreshButton loading={entry?.loading} onRefresh={() => void DashboardController.load(true)} />}
+        actions={
+          <RefreshButton loading={entry?.loading} onRefresh={() => void DashboardController.load(true)} />
+        }
       />
       {entry?.error && !data ? (
         <ErrorState message={entry.error} onRetry={() => void DashboardController.load(true)} />
@@ -43,7 +45,11 @@ export function DashboardScreen() {
                 <CardDescription>{DASHBOARD.dauHint}</CardDescription>
               </CardHeader>
               <CardContent>
-                {data ? <DailyBarChart data={data.dau} config={LISTENERS} /> : <Skeleton className="h-52 w-full" />}
+                {data ? (
+                  <DailyBarChart data={data.dau} config={LISTENERS} />
+                ) : (
+                  <Skeleton className="h-52 w-full" />
+                )}
               </CardContent>
             </Card>
             <ContentCard episodes={data?.episodes} />

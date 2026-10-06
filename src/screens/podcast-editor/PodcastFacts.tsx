@@ -36,7 +36,9 @@ export function PodcastFacts({ podcast: p }: { podcast: AdminPodcast }) {
               {PODCASTS.episodes(p.publishedEpisodeCount, p.episodeCount)}
             </Link>
           </DetailItem>
-          {p.publishedAt ? <DetailItem label={e.publishedAt}>{formatDateTime(p.publishedAt)}</DetailItem> : null}
+          {p.publishedAt ? (
+            <DetailItem label={e.publishedAt}>{formatDateTime(p.publishedAt)}</DetailItem>
+          ) : null}
           <DetailItem label={e.createdAt}>{formatDateTime(p.createdAt)}</DetailItem>
           <DetailItem label={e.updatedAt}>{formatDateTime(p.updatedAt)}</DetailItem>
           <DetailItem label="ID">

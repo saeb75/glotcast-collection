@@ -18,7 +18,10 @@ export class CategoriesController {
     )
   }
 
-  static async save(id: string | null, input: CategoryInput & { name: string }): Promise<AdminCategory | undefined> {
+  static async save(
+    id: string | null,
+    input: CategoryInput & { name: string },
+  ): Promise<AdminCategory | undefined> {
     const saved = await runAction(
       () => (id ? updateCategory(id, input) : createCategory(input)),
       id ? CATEGORIES.saved : CATEGORIES.created,

@@ -33,7 +33,10 @@ export function EpisodesToolbar({
           label={EPISODES.podcastLabel}
           allLabel={EPISODES.allPodcasts}
         />
-        <Tabs value={query.status} onValueChange={(status) => onChange({ status: status as EpisodeStatusFilter })}>
+        <Tabs
+          value={query.status}
+          onValueChange={(status) => onChange({ status: status as EpisodeStatusFilter })}
+        >
           <TabsList>
             {EPISODE_STATUSES.map((s) => (
               <TabsTrigger key={s} value={s}>

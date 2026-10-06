@@ -22,7 +22,8 @@ export const PODCASTS = {
     detailsHint: "The name, the address and what the show is about.",
     name: "Name",
     slug: "Slug",
-    slugHint: (preview: string) => (preview ? `Leave empty for “${preview}”.` : "Leave empty to make one from the name."),
+    slugHint: (preview: string) =>
+      preview ? `Leave empty for “${preview}”.` : "Leave empty to make one from the name.",
     description: "Description",
     categories: "Categories",
     categoriesHint: "In display order. The first one is the main category.",

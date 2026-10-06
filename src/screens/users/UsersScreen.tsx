@@ -43,7 +43,9 @@ export function UsersScreen() {
       <PageHeader
         title={USERS.title}
         description={USERS.subtitle}
-        actions={<RefreshButton loading={entry?.loading} onRefresh={() => void UsersController.load(query, true)} />}
+        actions={
+          <RefreshButton loading={entry?.loading} onRefresh={() => void UsersController.load(query, true)} />
+        }
       />
       <TableCard
         toolbar={
@@ -56,7 +58,12 @@ export function UsersScreen() {
         }
         footer={
           data && data.total > 0 ? (
-            <Pager page={query.page} pageSize={PAGE_SIZE} total={data.total} onPage={(page) => setQuery({ ...query, page })} />
+            <Pager
+              page={query.page}
+              pageSize={PAGE_SIZE}
+              total={data.total}
+              onPage={(page) => setQuery({ ...query, page })}
+            />
           ) : undefined
         }
       >

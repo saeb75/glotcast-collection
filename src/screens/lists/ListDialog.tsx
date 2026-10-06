@@ -3,7 +3,14 @@
 import { useRouter } from "next/navigation"
 import { type FormEvent, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
@@ -74,11 +81,21 @@ export function ListDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                 aria-invalid={errors.slug ? true : undefined}
                 onChange={(e) => setSlug(e.target.value.toLowerCase())}
               />
-              {errors.slug ? <FieldError>{errors.slug}</FieldError> : <FieldDescription>{LISTS.slugHint(slugify(name))}</FieldDescription>}
+              {errors.slug ? (
+                <FieldError>{errors.slug}</FieldError>
+              ) : (
+                <FieldDescription>{LISTS.slugHint(slugify(name))}</FieldDescription>
+              )}
             </Field>
             <Field>
               <FieldLabel htmlFor="list-description">{LISTS.description}</FieldLabel>
-              <Textarea id="list-description" rows={3} maxLength={2000} value={description} onChange={(e) => setDescription(e.target.value)} />
+              <Textarea
+                id="list-description"
+                rows={3}
+                maxLength={2000}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </Field>
           </FieldGroup>
           <DialogFooter>

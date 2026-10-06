@@ -29,7 +29,12 @@ export type PodcastForm = z.infer<typeof podcastFormSchema>
 export const episodeFormSchema = z.object({
   podcastId: z.string().min(1, EPISODES.errors.podcast),
   title: z.string().trim().min(1, EPISODES.errors.title).max(300),
-  number: z.number({ message: EPISODES.errors.number }).int(EPISODES.errors.number).min(0, EPISODES.errors.number).max(100_000).nullable(),
+  number: z
+    .number({ message: EPISODES.errors.number })
+    .int(EPISODES.errors.number)
+    .min(0, EPISODES.errors.number)
+    .max(100_000)
+    .nullable(),
   description: z.string().max(5000),
   coverUrl: imageUrl(EPISODES.errors.url),
   bannerUrl: imageUrl(EPISODES.errors.url),
@@ -42,7 +47,12 @@ export const categoryFormSchema = z.object({
   slug: slug(CATEGORIES.errors.slug),
   description: z.string().max(2000),
   coverUrl: imageUrl(PODCASTS.errors.url),
-  position: z.number({ message: CATEGORIES.errors.position }).int(CATEGORIES.errors.position).min(0, CATEGORIES.errors.position).max(10_000).nullable(),
+  position: z
+    .number({ message: CATEGORIES.errors.position })
+    .int(CATEGORIES.errors.position)
+    .min(0, CATEGORIES.errors.position)
+    .max(10_000)
+    .nullable(),
 })
 export type CategoryForm = z.infer<typeof categoryFormSchema>
 

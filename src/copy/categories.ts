@@ -9,7 +9,8 @@ export const CATEGORIES = {
   editTitle: "Edit category",
   name: "Name",
   slug: "Slug",
-  slugHint: (preview: string) => (preview ? `Leave empty for “${preview}”.` : "Leave empty to make one from the name."),
+  slugHint: (preview: string) =>
+    preview ? `Leave empty for “${preview}”.` : "Leave empty to make one from the name.",
   description: "Description",
   cover: "Cover",
   position: "Order",
@@ -22,5 +23,9 @@ export const CATEGORIES = {
       ? `“${name}” is removed from its ${podcasts} ${podcasts === 1 ? "podcast" : "podcasts"} and deleted for good.`
       : `“${name}” will be deleted for good.`,
   deleted: "Category deleted",
-  errors: { name: "Give the category a name.", slug: "Lowercase letters, digits and single dashes only.", position: "A whole number from 0." },
+  errors: {
+    name: "Give the category a name.",
+    slug: "Lowercase letters, digits and single dashes only.",
+    position: "A whole number from 0.",
+  },
 }

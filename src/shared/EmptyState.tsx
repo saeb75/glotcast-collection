@@ -1,6 +1,13 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 
 /** Nothing to show: an icon, a title, why, and an optional way out (clear the filters, create one). */
 export function EmptyState({
