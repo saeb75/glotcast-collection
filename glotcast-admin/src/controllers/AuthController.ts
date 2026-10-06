@@ -73,7 +73,13 @@ export class AuthController {
       login().setEmail(address)
       login().setStep("code")
     } catch (error) {
-      login().setError(error instanceof AuthError ? error.code : "unknown")
+      const code = error instanceof AuthError ? error.code : "unknown"
+      login().setError(code)
+      // Rate limited: an earlier code is likely in the inbox (valid for an hour), so let it be entered.
+      if (code === "rate_limited" || code === "email_quota") {
+        login().setEmail(address)
+        login().setStep("code")
+      }
     } finally {
       login().setBusy(false)
     }

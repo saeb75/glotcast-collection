@@ -27,7 +27,9 @@ export const AUTH = {
 export const AUTH_ERRORS: Record<AuthFailure, string> = {
   no_account: "There's no account with this email.",
   invalid_code: "That code is wrong or has expired. Check it, or send a new one.",
-  rate_limited: "Too many codes sent. Wait a minute and try again.",
+  rate_limited: "A code was sent a moment ago. Enter it below, or wait a minute before asking for a new one.",
+  email_quota:
+    "The email limit for this hour is reached. Enter a code you already received, or try again later.",
   not_configured: AUTH.notConfigured,
   unknown: "Something went wrong. Try again.",
 }

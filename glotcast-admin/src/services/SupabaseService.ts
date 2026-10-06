@@ -3,7 +3,8 @@ import { type Session, type SupabaseClient } from "@supabase/supabase-js"
 import { env } from "@/config/env"
 
 /** Why an email-code step failed, as a code (copy lives in `copy/auth.ts`). */
-export type AuthFailure = "no_account" | "invalid_code" | "rate_limited" | "not_configured" | "unknown"
+export type AuthFailure =
+  "no_account" | "invalid_code" | "rate_limited" | "email_quota" | "not_configured" | "unknown"
 
 export class AuthError extends Error {
   readonly code: AuthFailure
@@ -20,7 +21,11 @@ function failure(error: { message: string; code?: string; status?: number }): Au
     return new AuthError("no_account", error.message)
   if (error.code === "otp_expired" || text.includes("expired") || text.includes("invalid"))
     return new AuthError("invalid_code", error.message)
-  if (error.status === 429 || text.includes("rate limit")) return new AuthError("rate_limited", error.message)
+  // 429s: the per-email cooldown ("…only request this after 42 seconds") or the project's hourly email cap
+  // (Supabase's built-in mailer sends only a few emails an hour; a custom SMTP lifts it).
+  if (text.includes("email rate limit")) return new AuthError("email_quota", error.message)
+  if (error.status === 429 || text.includes("rate limit") || text.includes("request this after"))
+    return new AuthError("rate_limited", error.message)
   return new AuthError("unknown", error.message)
 }
 
