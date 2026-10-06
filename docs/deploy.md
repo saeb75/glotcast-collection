@@ -38,7 +38,7 @@ Coolify lists every `${…}` of the compose file. `.env.example` says where each
 | `DATABASE_URL` | Supabase → Connect → **Transaction pooler** (port 6543) | yes |
 | `DATABASE_MIGRATION_URL` | Supabase → Connect → **Session pooler** (port 5432): `db-migrate` runs on it at every start | yes |
 | `DATABASE_SSL` | `true` (default in the compose file) | |
-| `DATABASE_SSL_CA` | the Supabase CA (Project Settings → Database → SSL Configuration → Download certificate): paste the PEM | |
+| `DATABASE_SSL_CA` | the Supabase CA (Project Settings → Database → SSL Configuration → Download certificate): paste the PEM and tick *Is Multiline?* | |
 | `SUPABASE_URL` | `https://aoayqnsusoxjodjoxqaj.supabase.co` | |
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API Keys → **Secret key** — deletes accounts and claimed guests | yes |
 | `SUPABASE_JWT_SECRET` | only while the project still signs with the legacy HS256 secret | yes |
