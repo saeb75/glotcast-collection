@@ -146,9 +146,9 @@ Leitner boxes → words, `featureAccess` — once. `claim-guest` also does it if
 | Method | Path | Auth | Body / Response |
 |---|---|---|---|
 | GET | `/v1/me` | user | `Me` |
-| PATCH | `/v1/me` | user | partial of `name, nativeLanguage, uiLanguage, translationLanguage, level, dailyGoalMin, interests, motivation, reminderTime` (profile fields) and `timezone, pushEnabled, notifyReminders, notifyLearning, notifyNewEpisodes, notifyNews, proActive` (device/notification fields) → `Me`. An unknown `timezone` is a 400. Only profile fields mark the profile as set (see `claim-guest`) |
+| PATCH | `/v1/me` | user | partial of `name, nativeLanguage, translationLanguage, level, dailyGoalMin, interests, motivation, reminderTime` (profile fields) and `uiLanguage, timezone, pushEnabled, notifyReminders, notifyLearning, notifyNewEpisodes, notifyNews, proActive` (device/notification fields, synced by the app) → `Me`. An unknown `timezone` is a 400. Only profile fields mark the profile as set (see `claim-guest`) |
 | DELETE | `/v1/me` | user | 204. Deletes all app rows and the Supabase auth user |
-| POST | `/v1/me/claim-guest` | user (non-anonymous) | `{ guestAccessToken: string }` → `{ moved: { progress: number; words: number; follows: number; favorites: number } }`. Verifies the token is an anonymous user, moves its rows to the caller (caller wins on conflict; listening seconds of the same day are added up), deletes the guest. The guest's onboarding answers (level, languages, goal, interests, motivation, reminder) replace the profile of an account that never PATCHed `/v1/me`, otherwise only fill its empty fields. 403 for an anonymous caller or a non-anonymous `guestAccessToken`, 401 for an invalid one |
+| POST | `/v1/me/claim-guest` | user (non-anonymous) | `{ guestAccessToken: string }` → `{ moved: { progress: number; words: number; follows: number; favorites: number } }`. Verifies the token is an anonymous user, moves its rows to the caller (caller wins on conflict; listening seconds of the same day are added up), deletes the guest. The guest's onboarding answers (level, languages, goal, interests, motivation, reminder) replace the profile of an account that never PATCHed a profile field of `/v1/me`, otherwise only fill its empty fields (a `uiLanguage` is never replaced by none). The guest's `timezone` fills an empty one, the newer push opt-in wins, and its pushes of the day count toward the account's caps. 403 for an anonymous caller or a non-anonymous `guestAccessToken`, 401 for an invalid one |
 | GET | `/v1/me/stats?date=YYYY-MM-DD` | user | `Stats` (`date` = client's local today; default: today in UTC) |
 | POST | `/v1/me/listening` | user | `{ episodeId; level; positionSec; durationSec; listenedSec; date: "YYYY-MM-DD" }` → `{ progress: LevelProgress; today: DayStats; goalMetNow: boolean; milestone: number \| null }`. `listenedSec` = delta since last heartbeat, clamped to [0, 120]. Completed when `positionSec >= durationSec * 0.95`. `goalMetNow` true only on the heartbeat that crosses the goal. `milestone` = the streak length (7, 30, 100, 365) on the heartbeat that makes today a streak day and reaches it, else null |
 | GET | `/v1/me/progress?status=in_progress\|completed\|all&page&pageSize` | user | `Page<ProgressItem>` (most recent first) |
@@ -186,13 +186,14 @@ type PushData = {
     (then a words-due push if enough are due) or the user is listening right now; otherwise the most relevant of:
     weekly recap (Sunday), streak (≥ 3 days), continue an episode, words due, a new episode at their level, generic.
   - `streak_saver` (habit) at a fixed evening time when `notifyReminders`: only with a streak, nothing listened today
-    and no reminder/learning push sent today.
+    and no reminder/learning push sent today (nor the user's own reminder still to come that evening).
   - `learning` at a fixed time for users without a reminder (or with `notifyReminders` off) when `notifyLearning`:
     weekly recap (Sunday), words due, or finish an episode; nothing otherwise.
   - `new_episodes` (content) when `notifyNewEpisodes`: once an episode is live (published now, or its scheduled
     `publishedAt` passed) and the admin left "notify followers" on, its podcast's followers who haven't started it get
     one push (several new episodes are bundled), at most one a day.
 - Caps per user and local day: at most one `reminder`/`learning`/`streak_saver` push, at most two pushes in total.
+  Campaigns (an admin's decision) are not held back by the caps but count toward them; test pushes don't count.
   Quiet hours 22:00–08:00 (the user's own `reminderTime` is always allowed; campaigns are deferred to 08:00).
 - Campaigns (admin) reach users with `notifyNews` and `pushEnabled`.
 
@@ -288,7 +289,9 @@ type AdminEpisode = {
   id; podcast: { id; name }; number: number | null; title; description: string | null; coverUrl: string | null
   bannerUrl: string | null; isPro: boolean; status: PublishStatus; publishedAt: string | null
   legacyDocumentId: string | null; levels: AdminEpisodeLevel[]; createdAt; updatedAt
-  notifyFollowers: boolean; followersNotifiedAt: string | null      // when the followers' push was queued (once)
+  notifyFollowers: boolean; followersNotifiedAt: string | null      // when it was seen live and its followers' push
+                                                                     // planned (once, never cleared; null while not live
+                                                                     // or with notifyFollowers off)
 }
 type AdminEpisodeDetail = AdminEpisode & { levels: (AdminEpisodeLevel & { transcript: { chunks: TranscriptChunk[] } })[] }
 // POST (PATCH = partial). publishedAt: future = scheduled, null = draft; …/publish = live now
@@ -362,8 +365,14 @@ type SendRow = {
   `respectQuietHours`; `"local"` skips users whose time passed more than an hour ago. `cancel` stops queued rows of a
   `scheduled`/`sending` campaign. `test` sends the campaign (language: the given one, else the recipient's) to one
   user — the caller when no `userId`/`email` — right away, ignoring caps (409 `no_subscription` when that user has no
-  push subscription). `translate` uses Google Translation; `reach` counts users matching the audience (`matched`) and
-  those of them with push on and `notifyNews` (`reachable`).
+  push subscription; 404 when the user has no app account; 503 when OneSignal is not configured). `translate` uses
+  Google Translation (texts over the limits are cut with "…"); `reach` counts users matching the audience
+  (`matched`) and those of them with push on and `notifyNews` (`reachable`).
+- `send`, `PATCH`: 409 unless the campaign is a draft; `send` with `mode: "at"` in the past is a 400. A campaign is
+  `scheduled` until it is expanded into sends (now, at `sendAt`, or — for `"local"` — once the first time zone reaches
+  the date and time), `sending` while sends are queued, then `sent` (`failed` when nothing could be sent).
+- `CampaignStats`: `queued` includes sends in flight, `failed` includes expired ones, `skipped` includes canceled
+  ones; `onesignal` sums OneSignal's numbers over the campaign's requests (cached 5 minutes, `refresh=1` asks now).
 - Slugs default to the name (`-2`, `-3`… when taken); an explicit slug that is taken is a 409. A podcast that still
   has episodes cannot be deleted (409). Deleting an episode or a list also removes it from the home config.
 - `PUT /admin/home-config`: every id must exist (400 otherwise); drafts are allowed (the app skips what is hidden).
@@ -379,10 +388,14 @@ type SendRow = {
 
 - v1.1.0 (push notifications):
   - `Me` gains `timezone`, `pushEnabled`, `notifyReminders`, `notifyLearning`, `notifyNewEpisodes`, `notifyNews`,
-    `proActive` (PATCHable); device fields no longer mark the profile as set;
+    `proActive` (PATCHable); device fields — these and `uiLanguage`, which the app syncs — no longer mark the profile
+    as set;
   - `POST /v1/me/listening` returns `milestone`; `POST /v1/me/notifications/opened`;
   - the Push notifications section (`PushData`, automations, caps);
-  - admin: `/admin/notifications/*`, `notifyFollowers` on episodes and on `…/publish`.
+  - admin: `/admin/notifications/*`, `notifyFollowers` on episodes and on `…/publish`;
+  - implementation notes: campaigns are not capped but count toward the caps; the streak saver leaves the evening to
+    a later reminder; `followersNotifiedAt` stays null with `notifyFollowers` off; campaign status lifecycle, `send`
+    and `test` errors, `translate` cutting to the limits, what `CampaignStats` buckets count.
 
 - v1.0.1 (glotcast-api, first implementation) — clarifications, no breaking change:
   - errors carry `instance` (and `errors` on validation failures); 429 with `Retry-After`;

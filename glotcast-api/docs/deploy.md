@@ -52,6 +52,9 @@ Coolify lists every `${…}` of the compose file. `.env.example` says where each
 | `ASSEMBLYAI_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` | the content pipeline | yes |
 | `APP_MIN_SUPPORTED_VERSION`, `APP_LATEST_VERSION` | what `GET /v1/app/config` tells the app | |
 | `STRAPI_PUBLIC_URL` | the Strapi panel's URL, only for `migrate-strapi` (covers uploaded to Strapi) | |
+| `ONESIGNAL_APP_ID`, `ONESIGNAL_API_KEY` | OneSignal → Settings → Keys & IDs: the App ID and an App API key (push delivery) | key yes |
+| `NOTIFICATIONS_ENABLED` | `false` (default) until the go-live of §5; the kill switch of every automated push and campaign | |
+| `ONESIGNAL_CONCURRENCY` | parallel OneSignal requests while dispatching (default `4`) | |
 
 Mark `ADMIN_API_URL`, `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` as **build variables**: a Next.js build bakes
 `NEXT_PUBLIC_*` values in. The compose file passes them as `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL` and
@@ -84,3 +87,31 @@ Coolify's HTTPS redirect.
   and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, then build. The Google Translate key no longer ships in the app.
 - **Updates:** redeploy; migrations apply on start. `npm run db:generate` (locally) creates new migration files —
   commit them with the schema change. Never `drizzle-kit push` against Supabase.
+
+## 5. Push notifications
+
+The API decides who gets which push and when (from our database); OneSignal only delivers, addressed by external id
+= the Supabase user id (the app logs every user, guests included, in to OneSignal). A scheduler in the API runs every
+5 minutes: it marks newly live episodes, plans the daily reminder / learning / streak-saver pushes at each user's
+local time, the new-episode pushes, expands due campaigns and sends what is due. One instance runs it at a time
+(a lease row in `app.job_leases`); the send log is `app.notification_sends` (kept 90 days).
+
+1. **OneSignal dashboard** (done by you, once): the app → Settings → Push & In-App → **Apple iOS (APNs)**: upload the
+   `.p8` key (Key ID, Team ID, bundle id); **Google Android (FCM)**: the Firebase service-account JSON (FCM v1). Then
+   Settings → Keys & IDs → the App ID and a new App API key → `ONESIGNAL_APP_ID`, `ONESIGNAL_API_KEY` in Coolify.
+2. **Deploy disabled**: `NOTIFICATIONS_ENABLED=false`. Nothing is planned or sent; the admin's Automations page shows
+   the status. The back catalog is never pushed (episodes already live count as announced).
+3. **Dry run** in the api container's terminal — what a tick would plan, written in a transaction that is rolled
+   back (nothing is sent):
+   ```sh
+   node dist/cli.js notify status
+   node dist/cli.js notify dry-run --at 2026-10-07T17:00:00Z --window 60 --all-on   # as if all were on
+   node dist/cli.js notify dry-run --user you@example.com --at <your reminder time, UTC> --window 10
+   ```
+4. **Test push** to your own device (sign in to the app with that account first and allow notifications):
+   `node dist/cli.js notify test you@example.com --kind reminder --lang tr` (or the admin's campaign "Test send").
+5. **Enable**: `NOTIFICATIONS_ENABLED=true`, redeploy. Every automation starts **off**: in the admin → Automations,
+   switch on the daily **reminder alone** first and watch the Send log (and OneSignal's delivery numbers) for a day or
+   two; then the streak saver, learning and new episodes. Campaigns can be sent once enabled.
+6. **Stop everything**: `NOTIFICATIONS_ENABLED=false` and redeploy (or switch the automations off in the admin);
+   queued sends expire (2 h for automations, 12 h for campaigns) instead of going out late.

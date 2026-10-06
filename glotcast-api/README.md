@@ -41,6 +41,7 @@ User routes need `SUPABASE_URL` (tokens are verified against the project's JWKS)
 | `node dist/cli.js db-migrate` | applies `drizzle/` (journal `app.__drizzle_migrations`); the image runs it on start |
 | `node dist/cli.js migrate-strapi [--dry-run] [--timezone UTC]` | copies Strapi's published content into `app` (see below) |
 | `node dist/cli.js admin grant <email>` / `admin revoke <email>` / `admin list` | who may use `/v1/admin` |
+| `node dist/cli.js notify status` / `notify dry-run [--at ISO] [--window MIN] [--user id\|email]` / `notify test <email> [--kind reminder] [--lang tr]` / `notify tick` | push notifications: state, a rolled-back preview of a tick, a test push, one run (`docs/deploy.md` §5) |
 
 ## API (v1)
 
@@ -58,6 +59,11 @@ token>`; guests (anonymous Supabase sessions) are users. Details and shapes: `do
   through Google Cloud Translation v2; rate-limited per user.
 - **Words** (user): lookup (Yandex Dictionary + dictionaryapi.dev + wink-lemmatizer base forms; Google's free
   endpoint as the fallback; Google TTS for audio), saved words with Leitner boxes (1/2/4/8/16 days), review.
+- **Push notifications** (`src/notifications/`): the API decides, OneSignal delivers. A 5-minute scheduler (lease in
+  `app.job_leases`, kill switch `NOTIFICATIONS_ENABLED`) plans the daily reminder / learning / streak-saver pushes at
+  each user's local time, new-episode pushes to followers and admin campaigns, in the user's app language (copy in
+  16 languages, `src/notifications/copy/`), within caps and quiet hours; `app.notification_sends` is the outbox and
+  the send log. The heartbeat returns streak `milestone`s for the app's celebration.
 - **Admin** (`app_metadata.role = "admin"`, tag `admin`, every write audited in `app.admin_audit`): podcasts,
   episodes and their levels, publishing and scheduling, categories, lists, home config, users (backend Pro),
   dashboard, R2 presigned uploads, AssemblyAI transcription jobs (utterances / sentences / paragraphs with word

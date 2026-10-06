@@ -123,7 +123,10 @@ Run in the API container's terminal (Coolify → the resource → Terminal → `
    SELECT (SELECT count(*) FROM public.up_users) AS strapi_users,
           (SELECT count(*) FROM app.users WHERE legacy_strapi_user_id IS NOT NULL) AS claimed;
    ```
-9. **Release** — the new app (pointing at `https://api.glotcast.app`), the admin panel for editors. Old app versions
+9. **Push notifications** — deploy with `NOTIFICATIONS_ENABLED=false`; the go-live (OneSignal keys, dry run, the
+   reminder alone first) is `docs/deploy.md` §5. `migrate-strapi` marks the migrated episodes as announced, so the
+   back catalog never reaches followers.
+10. **Release** — the new app (pointing at `https://api.glotcast.app`), the admin panel for editors. Old app versions
    keep using Strapi and the vocab service: what they write there after a user's first sign-in to the new app is not
    copied again. Raise `APP_MIN_SUPPORTED_VERSION` to retire them, then stop Strapi and glotcast-vocab (keep their
    tables until you no longer need them).

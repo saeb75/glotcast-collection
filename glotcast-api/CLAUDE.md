@@ -23,7 +23,7 @@ before changing any endpoint. Conventions mirror `../../pokemon/api` (same devel
 
 `npm test` (unit + e2e; the e2e global setup starts the local cluster if needed and rebuilds `glotcast_test` from
 the migrations), `npm run lint`, `npm run typecheck`, `npm run build`, `npm run openapi`,
-`node dist/cli.js db-migrate | migrate-strapi [--dry-run] | admin grant <email>`.
+`node dist/cli.js db-migrate | migrate-strapi [--dry-run] | admin grant <email> | notify status|dry-run|test|tick`.
 
 ## Layout
 
@@ -33,6 +33,10 @@ the migrations), `npm run lint`, `npm run typecheck`, `npm run build`, `npm run 
   (`SUMMARY_COLUMNS`, `EPISODE_VISIBLE`); reuse it rather than writing new summary SQL.
 - `src/admin/<area>/` — admin endpoints: `@ApiTags("admin")`, `@UseGuards(AdminGuard)`,
   `@UseInterceptors(AdminAuditInterceptor)` and an `@Audit({...})` on every write (record ids, never whole bodies).
+- `src/notifications/` — push notifications (`NotificationsCoreModule`, used by the API and the CLI): pure rules /
+  copy / payload with specs, the planner, content and campaign services, the OneSignal client and dispatcher, the
+  scheduler. Planner SQL never calls `now()`: `$now` is a parameter (dry runs and tests travel in time). Push copy:
+  `en.ts` defines `Copy`, every language `satisfies` it; `copy.spec.ts` checks parity, plurals and lengths.
 - `src/strapi/` — `migrate-strapi` (reader, pure mapping, service). `src/users/` — provisioning, guest claim, legacy
   import. `src/cli.ts` — CLI entry (CLI-only modules: `StrapiModule`, `AdminRolesModule`).
 - `test/` — e2e specs (`*.e2e-spec.ts`), `helpers.ts` (`createTestApp()` with locally signed ES256 tokens and fakes
