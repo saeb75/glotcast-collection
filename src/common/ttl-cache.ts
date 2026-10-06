@@ -17,9 +17,9 @@ export class TtlCache<V> {
     return hit.value
   }
 
-  set(key: string, value: V, now = Date.now()): void {
+  set(key: string, value: V, now = Date.now(), ttlMs = this.ttlMs): void {
     this.entries.delete(key)
-    this.entries.set(key, { value, expires: now + this.ttlMs })
+    this.entries.set(key, { value, expires: now + ttlMs })
     while (this.entries.size > this.max) this.entries.delete(this.entries.keys().next().value!)
   }
 

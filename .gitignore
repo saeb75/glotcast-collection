@@ -12,3 +12,6 @@ tools-dist/
 .pgdata.log
 .DS_Store
 *.log
+
+# local data imports (never committed)
+.local/

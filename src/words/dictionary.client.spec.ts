@@ -100,4 +100,48 @@ describe("DictionaryClient", () => {
     await c.lookup("running", "de")
     expect(calls.length).toBeGreaterThan(count)
   })
+
+  it("answers with the meanings without waiting for slow definitions, which join the cache later", async () => {
+    vi.useFakeTimers()
+    try {
+      let release: (r: Response) => void = () => {}
+      vi.stubGlobal(
+        "fetch",
+        vi.fn((input: string) => {
+          const url = new URL(input)
+          if (url.host === "api.dictionaryapi.dev") return new Promise<Response>((r) => (release = r))
+          return Promise.resolve(new Response(JSON.stringify(YANDEX), { status: 200 }))
+        }),
+      )
+      const c = client("yx")
+      const pending = c.lookup("run", "tr")
+      await vi.advanceTimersByTimeAsync(700)
+      const first = await pending
+      expect(first.translations).toEqual([{ partOfSpeech: "verb", terms: ["koşmak", "çalışmak"] }])
+      expect(first.definitions).toEqual([])
+      release(new Response(JSON.stringify(DICTIONARY_API), { status: 200 }))
+      await vi.advanceTimersByTimeAsync(0)
+      const again = await c.lookup("run", "tr")
+      expect(again.definitions).toEqual([
+        { partOfSpeech: "verb", definition: "To move swiftly.", example: "Run!" },
+      ])
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("skips a source that failed for a while instead of waiting on it again", async () => {
+    const calls = stubFetch((url) =>
+      url.host === "api.dictionaryapi.dev"
+        ? json(503, "down")
+        : url.host === "dictionary.yandex.net"
+          ? json(200, YANDEX)
+          : undefined,
+    )
+    const c = client("yx")
+    await c.lookup("run", "tr")
+    await c.lookup("walk", "tr")
+    expect(calls.filter((h) => h === "api.dictionaryapi.dev")).toHaveLength(1)
+    expect(calls.filter((h) => h === "dictionary.yandex.net")).toHaveLength(2)
+  })
 })
