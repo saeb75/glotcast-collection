@@ -118,6 +118,13 @@ type Me = {
   motivation: "career" | "travel" | "exams" | "fun" | "other" | null
   reminderTime: string | null              // "HH:mm" local
   featureAccess: boolean                   // backend-granted Pro
+  timezone: string | null                  // IANA, e.g. "Europe/Istanbul" (reported by the device)
+  pushEnabled: boolean                     // the device is opted in to push (OneSignal), reported by the device
+  notifyReminders: boolean                 // daily reminder + streak saver (default true)
+  notifyLearning: boolean                  // words due, finish an episode, weekly recap (default true)
+  notifyNewEpisodes: boolean               // new episodes of followed podcasts (default true)
+  notifyNews: boolean                      // admin campaigns: news & offers (default true)
+  proActive: boolean                       // the app sees an active subscription; targeting only, never grants access
   createdAt: string
 }
 type DayStats = { date: string; seconds: number }   // date = user's local "YYYY-MM-DD"
@@ -139,11 +146,11 @@ Leitner boxes → words, `featureAccess` — once. `claim-guest` also does it if
 | Method | Path | Auth | Body / Response |
 |---|---|---|---|
 | GET | `/v1/me` | user | `Me` |
-| PATCH | `/v1/me` | user | partial of `name, nativeLanguage, uiLanguage, translationLanguage, level, dailyGoalMin, interests, motivation, reminderTime` → `Me` |
+| PATCH | `/v1/me` | user | partial of `name, nativeLanguage, uiLanguage, translationLanguage, level, dailyGoalMin, interests, motivation, reminderTime` (profile fields) and `timezone, pushEnabled, notifyReminders, notifyLearning, notifyNewEpisodes, notifyNews, proActive` (device/notification fields) → `Me`. An unknown `timezone` is a 400. Only profile fields mark the profile as set (see `claim-guest`) |
 | DELETE | `/v1/me` | user | 204. Deletes all app rows and the Supabase auth user |
 | POST | `/v1/me/claim-guest` | user (non-anonymous) | `{ guestAccessToken: string }` → `{ moved: { progress: number; words: number; follows: number; favorites: number } }`. Verifies the token is an anonymous user, moves its rows to the caller (caller wins on conflict; listening seconds of the same day are added up), deletes the guest. The guest's onboarding answers (level, languages, goal, interests, motivation, reminder) replace the profile of an account that never PATCHed `/v1/me`, otherwise only fill its empty fields. 403 for an anonymous caller or a non-anonymous `guestAccessToken`, 401 for an invalid one |
 | GET | `/v1/me/stats?date=YYYY-MM-DD` | user | `Stats` (`date` = client's local today; default: today in UTC) |
-| POST | `/v1/me/listening` | user | `{ episodeId; level; positionSec; durationSec; listenedSec; date: "YYYY-MM-DD" }` → `{ progress: LevelProgress; today: DayStats; goalMetNow: boolean }`. `listenedSec` = delta since last heartbeat, clamped to [0, 120]. Completed when `positionSec >= durationSec * 0.95`. `goalMetNow` true only on the heartbeat that crosses the goal |
+| POST | `/v1/me/listening` | user | `{ episodeId; level; positionSec; durationSec; listenedSec; date: "YYYY-MM-DD" }` → `{ progress: LevelProgress; today: DayStats; goalMetNow: boolean; milestone: number \| null }`. `listenedSec` = delta since last heartbeat, clamped to [0, 120]. Completed when `positionSec >= durationSec * 0.95`. `goalMetNow` true only on the heartbeat that crosses the goal. `milestone` = the streak length (7, 30, 100, 365) on the heartbeat that makes today a streak day and reaches it, else null |
 | GET | `/v1/me/progress?status=in_progress\|completed\|all&page&pageSize` | user | `Page<ProgressItem>` (most recent first) |
 | GET | `/v1/me/follows?page&pageSize` | user | `Page<PodcastSummary>` |
 | PUT | `/v1/me/follows/:podcastId` | user | 204 (idempotent) |
@@ -151,6 +158,43 @@ Leitner boxes → words, `featureAccess` — once. `claim-guest` also does it if
 | GET | `/v1/me/favorites?page&pageSize` | user | `Page<EpisodeSummary>` |
 | PUT | `/v1/me/favorites/:episodeId` | user | 204 |
 | DELETE | `/v1/me/favorites/:episodeId` | user | 204 |
+| POST | `/v1/me/notifications/opened` | user | `{ ref: string }` → 204. The app reports a tapped push (`PushData.ref`); marks the newest matching send of the last 3 days as opened (no-op when none) |
+
+## Push notifications
+
+The API decides who gets which push and when; OneSignal only delivers. The app logs every user — guests included —
+in to OneSignal with `OneSignal.login(<Supabase user id>)` (external id), so the API targets users by id. The text
+is rendered by the API in the user's `uiLanguage` (fallback `en`). Times are the user's local time (`timezone`);
+users without a `timezone` or with `pushEnabled = false` get no automated pushes.
+
+```ts
+type Locale = "ar" | "de" | "en" | "es" | "fr" | "hi" | "id" | "it" | "ja" | "ko" | "pl" | "pt" | "ru" | "tr" | "vi" | "zh"
+type PushGroup = "habit" | "learning" | "content" | "campaign" | "test"
+type NotificationKind = "reminder" | "streak_saver" | "learning" | "new_episodes" | "campaign" | "test"
+type PushLink = { type: "home" | "episode" | "podcast" | "player" | "paywall" | "review" | "words"; id?: string; level?: Level }
+// The push's `additionalData` (OneSignal) — what the app routes on a tap:
+type PushData = {
+  t: PushLink["type"]; id?: string; lv?: Level
+  k: PushGroup
+  ref: string                              // kind ("reminder", "new_episodes", …) or "c:<campaignId>"; sent back to …/opened
+}
+```
+- `player` opens the player for episode `id` at level `lv`; `episode`/`podcast` open those pages; `paywall`, `review`
+  (Leitner review session), `words` (Words tab), `home`.
+- Automations (each switched on/off in the admin; all start off):
+  - `reminder` (group habit) at the user's `reminderTime` when `notifyReminders`: skipped when today's goal is met
+    (then a words-due push if enough are due) or the user is listening right now; otherwise the most relevant of:
+    weekly recap (Sunday), streak (≥ 3 days), continue an episode, words due, a new episode at their level, generic.
+  - `streak_saver` (habit) at a fixed evening time when `notifyReminders`: only with a streak, nothing listened today
+    and no reminder/learning push sent today.
+  - `learning` at a fixed time for users without a reminder (or with `notifyReminders` off) when `notifyLearning`:
+    weekly recap (Sunday), words due, or finish an episode; nothing otherwise.
+  - `new_episodes` (content) when `notifyNewEpisodes`: once an episode is live (published now, or its scheduled
+    `publishedAt` passed) and the admin left "notify followers" on, its podcast's followers who haven't started it get
+    one push (several new episodes are bundled), at most one a day.
+- Caps per user and local day: at most one `reminder`/`learning`/`streak_saver` push, at most two pushes in total.
+  Quiet hours 22:00–08:00 (the user's own `reminderTime` is always allowed; campaigns are deferred to 08:00).
+- Campaigns (admin) reach users with `notifyNews` and `pushEnabled`.
 
 ## Translation (user)
 
@@ -203,7 +247,8 @@ All writes are audited (`app.admin_audit`; `GET /admin/audit?action&targetId&act
 - `GET /admin/dashboard` → `{ users: { total; anonymous; last7Days }; dau: DayCount[] (30d); episodes: { published; drafts }; topEpisodes: { episode: EpisodeSummary; listeners: number }[] }`
 - Podcasts: `GET /admin/podcasts?q&page`, `POST /admin/podcasts`, `GET|PATCH|DELETE /admin/podcasts/:id`
 - Episodes: `GET /admin/episodes?q&podcastId&status=published|draft&page`, `POST /admin/episodes`,
-  `GET|PATCH|DELETE /admin/episodes/:id`, `POST /admin/episodes/:id/publish`, `POST /admin/episodes/:id/unpublish`
+  `GET|PATCH|DELETE /admin/episodes/:id`, `POST /admin/episodes/:id/publish` (optional body `{ notifyFollowers?: boolean }`),
+  `POST /admin/episodes/:id/unpublish`
 - Levels: `PUT /admin/episodes/:id/levels/:level` `{ audioUrl; durationSec; description?; transcript: { chunks } }`, `DELETE /admin/episodes/:id/levels/:level`
 - Categories: `GET|POST /admin/categories`, `PATCH|DELETE /admin/categories/:id`
 - Lists: `GET|POST /admin/lists`, `GET|PATCH|DELETE /admin/lists/:id`, `PUT /admin/lists/:id/episodes` `{ episodeIds: string[] }` (ordered)
@@ -214,6 +259,16 @@ All writes are audited (`app.admin_audit`; `GET /admin/audit?action&targetId&act
   - `POST /admin/transcribe` `{ audioUrl }` → `{ jobId }`; `GET /admin/transcribe/:jobId` → `{ status: "queued"|"processing"|"completed"|"error"; error?; durationSec?; utterances?; sentences?; paragraphs? }` where each grouping is `TranscriptChunk[]` (with `words`)
   - `POST /admin/covers/prompt` `{ podcastName; episodeTitle; transcriptText; style }` → `{ prompt }`
   - `POST /admin/covers/image` `{ prompt; model: "gemini"|"openai"; aspect: "3:4"|"4:3"|"1:1" }` → `{ url }` (uploaded to R2 `images/`)
+- Notifications (`/admin/notifications/*`):
+  - `GET status` → `NotificationsStatus`
+  - `GET|PUT automations` → `AutomationsView` (PUT body: `AutomationSettings`)
+  - Campaigns: `GET campaigns?status&page`, `POST campaigns`, `GET|PATCH|DELETE campaigns/:id`,
+    `POST campaigns/:id/send` `{ delivery: CampaignDelivery }`, `POST campaigns/:id/cancel`,
+    `POST campaigns/:id/test` `{ language?: Locale; userId?: string; email?: string }` → `{ onesignalId: string | null }`,
+    `GET campaigns/:id/stats?refresh=1` → `CampaignStats`
+  - `POST translate` `{ source: "en"|"tr"; title; body }` → `{ messages: Record<Locale, CampaignMessage> }`
+  - `POST reach` `{ audience: Audience }` → `{ matched: number; reachable: number; byLanguage: { language: Locale; reachable: number }[] }`
+  - `GET sends?kind&status&campaignId&userId&limit&before` → `{ entries: SendRow[]; nextBefore?: number }` (newest first)
 
 ## Appendix: admin shapes
 
@@ -233,10 +288,12 @@ type AdminEpisode = {
   id; podcast: { id; name }; number: number | null; title; description: string | null; coverUrl: string | null
   bannerUrl: string | null; isPro: boolean; status: PublishStatus; publishedAt: string | null
   legacyDocumentId: string | null; levels: AdminEpisodeLevel[]; createdAt; updatedAt
+  notifyFollowers: boolean; followersNotifiedAt: string | null      // when the followers' push was queued (once)
 }
 type AdminEpisodeDetail = AdminEpisode & { levels: (AdminEpisodeLevel & { transcript: { chunks: TranscriptChunk[] } })[] }
 // POST (PATCH = partial). publishedAt: future = scheduled, null = draft; …/publish = live now
-type EpisodeInput = { podcastId; title; number?; description?; coverUrl?; bannerUrl?; isPro? /* default true */; publishedAt? }
+type EpisodeInput = { podcastId; title; number?; description?; coverUrl?; bannerUrl?; isPro? /* default true */; publishedAt?;
+                      notifyFollowers? /* default true: push followers when it goes live */ }
 // GET /admin/episodes → Page<AdminEpisode>; GET|POST|PATCH /admin/episodes/:id and PUT …/levels/:level → AdminEpisodeDetail;
 // …/publish, …/unpublish → AdminEpisode. PUT …/levels/:level drops that level's cached translations.
 
@@ -254,7 +311,59 @@ type AdminUserRow = { id; email: string | null; name: string | null; isAnonymous
                       featureAccess: boolean; legacyStrapiUserId: number | null; createdAt; lastSeenAt }
 type AdminUser = { user: Me & { lastSeenAt; legacyStrapiUserId: number | null }; stats: Stats }   // GET|PATCH /admin/users/:id
 type DayCount = { date: string; count: number }
+
+// Notifications
+type NotificationsStatus = { configured: boolean /* OneSignal keys set */; enabled: boolean /* NOTIFICATIONS_ENABLED */;
+                             lastTickAt: string | null; queued: number }
+type AutomationSettings = {
+  quietHours: { from: string; to: string }                       // "HH:mm", default 22:00–08:00
+  reminder: { enabled: boolean; weeklyRecap: boolean; minDue: number /* 5 */ }
+  streakSaver: { enabled: boolean; time: string /* "21:00" */; minStreak: number /* 2 */ }
+  learning: { enabled: boolean; time: string /* "18:00" */ }
+  newEpisodes: { enabled: boolean; debounceMin: number /* 15 */; freshHours: number /* 36 */ }
+}
+type AutomationsView = { settings: AutomationSettings; status: NotificationsStatus;
+                         last7Days: { kind: NotificationKind; sent: number; opened: number }[] }
+type CampaignMessage = { title: string /* ≤ 60 */; body: string /* ≤ 180 */ }
+type Audience = {
+  segment: "all" | "pro" | "free" | "guests" | "signedIn"          // pro = featureAccess or proActive
+  levels?: Level[]; languages?: Locale[]                           // app language
+  inactiveDays?: number; activeWithinDays?: number                 // by last seen
+  podcastIds?: string[]                                            // followers of any of these
+}
+type CampaignDelivery = { mode: "now" } | { mode: "at"; sendAt: string }
+                      | { mode: "local"; date: string /* YYYY-MM-DD */; time: string /* HH:mm, each user's local time */ }
+type CampaignStatus = "draft" | "scheduled" | "sending" | "sent" | "canceled" | "failed"
+type AdminCampaign = {
+  id; name; status: CampaignStatus; sourceLanguage: "en" | "tr"
+  messages: Partial<Record<Locale, CampaignMessage>>              // a user's language falls back to en, then the source
+  audience: Audience; link: PushLink; imageUrl: string | null; respectQuietHours: boolean
+  delivery: CampaignDelivery | null; recipients: number | null; sentAt: string | null
+  createdBy: { id; email: string | null } | null; createdAt; updatedAt
+}
+// POST (PATCH = partial, drafts only → 409 otherwise); DELETE: drafts and finished campaigns
+type CampaignInput = { name; sourceLanguage; messages; audience; link; imageUrl?; respectQuietHours? /* default true */ }
+type CampaignStats = {
+  recipients: number; queued: number; sent: number; failed: number; unreachable: number; skipped: number; opened: number
+  onesignal: { successful: number; failed: number; errored: number; converted: number; received: number } | null
+  byLanguage: { language: Locale; recipients: number; opened: number }[]
+  refreshedAt: string | null
+}
+type SendStatus = "queued" | "sending" | "sent" | "failed" | "unreachable" | "expired" | "canceled" | "skipped"
+type SendRow = {
+  id: number; user: { id; email: string | null; isAnonymous: boolean }
+  kind: NotificationKind; variant: string | null; campaignId: string | null
+  status: SendStatus; skipReason: string | null; language: Locale; title; body; link: PushLink
+  localDate: string; dueAt: string; sentAt: string | null; openedAt: string | null; createdAt
+}
 ```
+- Notifications: `campaigns/:id/send` needs a message in the source language (400) and OneSignal configured and
+  `NOTIFICATIONS_ENABLED` (503); `mode: "now"` and `"at"` defer users in quiet hours to their 08:00 when
+  `respectQuietHours`; `"local"` skips users whose time passed more than an hour ago. `cancel` stops queued rows of a
+  `scheduled`/`sending` campaign. `test` sends the campaign (language: the given one, else the recipient's) to one
+  user — the caller when no `userId`/`email` — right away, ignoring caps (409 `no_subscription` when that user has no
+  push subscription). `translate` uses Google Translation; `reach` counts users matching the audience (`matched`) and
+  those of them with push on and `notifyNews` (`reachable`).
 - Slugs default to the name (`-2`, `-3`… when taken); an explicit slug that is taken is a 409. A podcast that still
   has episodes cannot be deleted (409). Deleting an episode or a list also removes it from the home config.
 - `PUT /admin/home-config`: every id must exist (400 otherwise); drafts are allowed (the app skips what is hidden).
@@ -267,6 +376,13 @@ type DayCount = { date: string; count: number }
   | risograph | bold-pop` (default `vibrant-gradient`); `covers/image`: `model` defaults to `gemini`.
 
 ## Changelog
+
+- v1.1.0 (push notifications):
+  - `Me` gains `timezone`, `pushEnabled`, `notifyReminders`, `notifyLearning`, `notifyNewEpisodes`, `notifyNews`,
+    `proActive` (PATCHable); device fields no longer mark the profile as set;
+  - `POST /v1/me/listening` returns `milestone`; `POST /v1/me/notifications/opened`;
+  - the Push notifications section (`PushData`, automations, caps);
+  - admin: `/admin/notifications/*`, `notifyFollowers` on episodes and on `…/publish`.
 
 - v1.0.1 (glotcast-api, first implementation) — clarifications, no breaking change:
   - errors carry `instance` (and `errors` on validation failures); 429 with `Retry-After`;
