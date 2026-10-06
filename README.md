@@ -102,4 +102,4 @@ file in `src/screens/` and `src/shared/`; shared pieces: `PageHeader`, `TableCar
 `LevelBadges`, `CoverThumb`, `ImageField`, `CoverGenerator`, `EpisodePickerDialog`, `SortableList`, `ConfirmDialog`.
 `src/components/ui/` and `src/hooks/` are shadcn CLI output (`radix-nova`) — add or update with
 `npx shadcn@4.21.3 add <name>`, don't edit by hand. Colours come from the tokens in `src/app/globals.css` (neutral,
-`brand` / `chart-1` GlotCast pink, `positive`, `warning`, `destructive`); light / dark / system via `next-themes`.
+`brand` / `chart-1` GlotCast ember, `positive`, `warning`, `destructive`); light / dark / system via `next-themes`.

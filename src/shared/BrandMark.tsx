@@ -1,7 +1,7 @@
 import { AudioLines } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-/** The panel's square logo (GlotCast pink). */
+/** The panel's square logo (GlotCast ember). */
 export function BrandMark({ className }: { className?: string }) {
   return (
     <div

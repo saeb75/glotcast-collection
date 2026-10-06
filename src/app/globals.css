@@ -72,10 +72,10 @@
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
-    /* GlotCast pink: the brand mark, values in charts, the line being played. */
-    --brand: #eb4c89;
+    /* GlotCast ember (the app's brand): the brand mark, values in charts, the line being played. */
+    --brand: #b94d17;
     --brand-foreground: #ffffff;
-    --chart-1: #eb4c89;
+    --chart-1: #b94d17;
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
@@ -113,9 +113,9 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
-    --brand: #f0619a;
+    --brand: #ee8146;
     --brand-foreground: #ffffff;
-    --chart-1: #f0619a;
+    --chart-1: #ee8146;
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
