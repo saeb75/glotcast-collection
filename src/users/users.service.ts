@@ -158,10 +158,12 @@ export class UsersService {
       this.deleted.add(from)
       this.forget(from)
     }
-    if (claims.email) {
-      await this.db.transaction(async (tx) => {
-        await this.legacy.importFor(tx, claims.userId, claims.email!)
-      })
+    // The guest is already merged: a failing legacy import is logged, not reported as a failed claim.
+    const email = claims.email
+    if (email) {
+      await this.db
+        .transaction((tx) => this.legacy.importFor(tx, claims.userId, email))
+        .catch((err: unknown) => this.logger.warn({ err, userId: claims.userId }, "legacy import failed"))
     }
     return { moved }
   }

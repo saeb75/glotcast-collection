@@ -24,7 +24,8 @@ describe("Me (e2e)", () => {
       UNION ALL SELECT legacy_document_id, id FROM app.podcasts WHERE legacy_document_id IS NOT NULL
     `)
     const byDoc = new Map(rows.rows.map((r) => [r.legacy_document_id, r.id]))
-    for (const [key, doc] of Object.entries(LEGACY)) if (byDoc.has(doc)) ids[key as keyof typeof LEGACY] = byDoc.get(doc)!
+    for (const [key, doc] of Object.entries(LEGACY))
+      if (byDoc.has(doc)) ids[key as keyof typeof LEGACY] = byDoc.get(doc)!
   })
 
   afterAll(async () => {

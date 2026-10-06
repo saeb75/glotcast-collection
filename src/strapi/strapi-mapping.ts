@@ -33,7 +33,8 @@ const num = (v: unknown): number | null => {
   return typeof n === "number" && Number.isFinite(n) ? n : null
 }
 const round = (n: number): number => Math.round(n * 1000) / 1000
-const text = (v: unknown): string => (typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : "")
+const text = (v: unknown): string =>
+  typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : ""
 
 type RawChunk = {
   text?: unknown

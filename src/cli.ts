@@ -16,6 +16,7 @@
  *
  * Runs on a slim application context (no HTTP server).
  */
+import "./cli-env"
 import "reflect-metadata"
 import { writeFileSync } from "node:fs"
 import { parseArgs } from "node:util"
