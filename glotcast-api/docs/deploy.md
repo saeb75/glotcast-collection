@@ -6,8 +6,8 @@ keeps `public`, this API owns schema `app`). Media lives on **Cloudflare R2**. C
 
 | Service | What | Reachable at |
 |---|---|---|
-| `api` | This NestJS API — everything the app and the admin panel call, and its CLI | `https://api.<domain>` (port 3000) |
-| `admin` | The admin panel (Next.js, `../glotcast-admin`, its own Dockerfile) | `https://admin.<domain>` (its port, 3000 for `next start`) |
+| `api` | This NestJS API — everything the app and the admin panel call, and its CLI | `https://api.glotcast.app` (port 3000) |
+| `admin` | The admin panel (Next.js, `../glotcast-admin`, its own Dockerfile) | `https://admin.glotcast.app` (its port, 3000 for `next start`) |
 
 **Server:** the API is light: 1 vCPU / 1 GB RAM is enough for both containers. amd64 or arm64.
 
@@ -26,7 +26,7 @@ Coolify builds from one git repository. Two ways to lay it out:
   each (this repo's `Dockerfile`; the admin's own), with the variables of §2 split between them. The compose file
   then only documents the pairing.
 
-Domains: `api` → `https://api.<domain>` (port 3000); `admin` → `https://admin.<domain>`. HTTPS certificates come
+Domains: `api` → `https://api.glotcast.app` (port 3000); `admin` → `https://admin.glotcast.app`. HTTPS certificates come
 from Coolify. Optionally turn on automatic deployment on push.
 
 ## 2. Environment variables
@@ -43,8 +43,8 @@ Coolify lists every `${…}` of the compose file. `.env.example` says where each
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API Keys → **Secret key** — deletes accounts and claimed guests | yes |
 | `SUPABASE_JWT_SECRET` | only while the project still signs with the legacy HS256 secret | yes |
 | `SUPABASE_PUBLISHABLE_KEY` | Project Settings → API Keys → **Publishable key** (the admin panel's sign-in) | |
-| `CORS_ORIGINS` | `https://admin.<domain>` | |
-| `ADMIN_API_URL` | `https://api.<domain>` | |
+| `CORS_ORIGINS` | `https://admin.glotcast.app` | |
+| `ADMIN_API_URL` | `https://api.glotcast.app` | |
 | `TRUST_PROXY` | `1` behind Coolify's proxy alone; **`2`** when Cloudflare proxies the domain (orange cloud) | |
 | `GOOGLE_TRANSLATE_API_KEY` | Cloud Translation v2 key (server only) | yes |
 | `YANDEX_DICT_KEY` | Yandex Dictionary key | yes |
@@ -68,7 +68,7 @@ Coolify's HTTPS redirect.
 - **Migrations run on every start:** `node dist/cli.js db-migrate && exec node dist/main.js`. They only ever touch
   schema `app` (drizzle-kit sees nothing else) and are no-ops once applied. The first one creates schema `app`, the
   `unaccent` and `pg_trgm` extensions (in `extensions`, Supabase's default) and every table, with RLS on.
-- **Check:** `https://api.<domain>/v1/health/ready` → `{"ok":true,"checks":{"database":"up"}}`. The container
+- **Check:** `https://api.glotcast.app/v1/health/ready` → `{"ok":true,"checks":{"database":"up"}}`. The container
   healthcheck calls `/v1/health/live`.
 - **Logs:** per service in Coolify; JSON (pino) with a request id per line (`x-request-id` is echoed in responses;
   pass your own to correlate). Authorization headers are redacted. Swagger (`/docs`) is off in production.
@@ -77,10 +77,10 @@ Coolify's HTTPS redirect.
 
 - **Content:** the production migration from Strapi — `docs/cutover.md` §3 (dry run, run, verify counts).
 - **Admin access:** in the api container's terminal (Coolify → the resource → Terminal → `api`):
-  `node dist/cli.js admin grant <email>` (a registered Supabase account), then sign in at `https://admin.<domain>`.
+  `node dist/cli.js admin grant <email>` (a registered Supabase account), then sign in at `https://admin.glotcast.app`.
   `admin list` shows who has the role, `admin revoke <email>` removes it; the role reaches the token on the next
   sign-in or token refresh.
-- **The app:** in the EAS environments, `EXPO_PUBLIC_API_URL=https://api.<domain>`, `EXPO_PUBLIC_SUPABASE_URL`
+- **The app:** in the EAS environments, `EXPO_PUBLIC_API_URL=https://api.glotcast.app`, `EXPO_PUBLIC_SUPABASE_URL`
   and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, then build. The Google Translate key no longer ships in the app.
 - **Updates:** redeploy; migrations apply on start. `npm run db:generate` (locally) creates new migration files —
   commit them with the schema change. Never `drizzle-kit push` against Supabase.
