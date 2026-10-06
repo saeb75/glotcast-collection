@@ -15,6 +15,10 @@ export class GoogleTranslateClient {
     this.key = config.get("GOOGLE_TRANSLATE_API_KEY") ?? null
   }
 
+  get configured(): boolean {
+    return this.key !== null
+  }
+
   async translate(texts: string[], target: string): Promise<string[]> {
     if (!this.key) throw new ServiceUnavailableException("translation is not configured")
     const out: string[] = []
