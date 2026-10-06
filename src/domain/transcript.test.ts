@@ -138,3 +138,14 @@ describe("speakers, text, issues, modes", () => {
     expect(availableModes(undefined)).toEqual([])
   })
 })
+
+describe("parseTimestamp", () => {
+  it("reads seconds and clock times", async () => {
+    const { parseTimestamp } = await import("./transcript")
+    expect(parseTimestamp("83.4")).toBe(83.4)
+    expect(parseTimestamp("01:23.4")).toBe(83.4)
+    expect(parseTimestamp("1:02:03.5")).toBe(3723.5)
+    expect(parseTimestamp("abc")).toBeNull()
+    expect(parseTimestamp("")).toBeNull()
+  })
+})

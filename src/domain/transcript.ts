@@ -190,3 +190,15 @@ export function transcriptIssues(chunks: readonly TranscriptChunk[], duration?: 
   })
   return issues
 }
+
+/** A typed time back to seconds: "83.4", "1:23.4", "01:23.45", "1:02:03.5"; null when unreadable. */
+export function parseTimestamp(text: string): number | null {
+  const value = text.trim()
+  if (!value) return null
+  if (/^\d+(\.\d+)?$/.test(value)) return Number(value)
+  const parts = value.split(":")
+  if (parts.length < 2 || parts.length > 3 || parts.some((p) => !/^\d+(\.\d+)?$/.test(p))) return null
+  const nums = parts.map(Number)
+  const seconds = nums.reduce((total, n) => total * 60 + n, 0)
+  return Number.isFinite(seconds) ? roundTime(seconds) : null
+}
