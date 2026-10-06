@@ -53,8 +53,14 @@ export class EpisodesService {
       user ? this.progress.forEpisode(user.userId, id) : Promise.resolve([]),
     ])
     if (!podcast) throw new NotFoundException(`episode ${ref} not found`)
-    const { description: _podcastDescription, ...podcastSummary } = podcast
-    return { ...episode, podcast: podcastSummary, levels, isFavorite, progress }
+    const summary = {
+      id: podcast.id,
+      slug: podcast.slug,
+      name: podcast.name,
+      coverUrl: podcast.coverUrl,
+      episodeCount: podcast.episodeCount,
+    }
+    return { ...episode, podcast: summary, levels, isFavorite, progress }
   }
 
   async transcript(ref: string, level: Level): Promise<Transcript> {

@@ -31,6 +31,8 @@ export const envSchema = z.object({
     ),
   // Proxies in front of the API (Coolify's Traefik = 1): the client IP for rate limits comes from X-Forwarded-For.
   TRUST_PROXY: z.coerce.number().int().nonnegative().default(0),
+  // Requests per minute per client IP, every route (translation and lookups also have a per-user limit).
+  RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(120),
 
   // Supabase Auth: the app signs users in (Apple, Google, anonymous guests); the API verifies their access
   // tokens against the project's JWKS. Unset = the user routes answer 503. The service role key is only used

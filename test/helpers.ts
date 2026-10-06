@@ -5,6 +5,7 @@ import request from "supertest"
 import { AssemblyAiClient, type AaiTranscript } from "../src/admin/transcribe/assemblyai.client"
 import { type AaiSegment } from "../src/admin/transcribe/assemblyai"
 import { ImageModels } from "../src/admin/covers/image-models"
+import { AdminRolesModule } from "../src/admin/admin-roles.module"
 import { AppModule } from "../src/app.module"
 import { AUTH_KEYS } from "../src/auth/auth-verifier"
 import { DRIZZLE, type Database } from "../src/database/database.module"
@@ -158,7 +159,8 @@ export async function createTestApp(
     storage: new FakeStorage(),
     assemblyai: new FakeAssemblyAi(),
   }
-  let builder = Test.createTestingModule({ imports: [AppModule, StrapiModule] })
+  // The CLI-only modules (migrate-strapi, admin grant) are tested through the same app.
+  let builder = Test.createTestingModule({ imports: [AppModule, StrapiModule, AdminRolesModule] })
     .overrideProvider(AUTH_KEYS)
     .useValue({ issuer: ISSUER, key: pair.publicKey })
     .overrideProvider(SupabaseAdmin)

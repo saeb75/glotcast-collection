@@ -43,7 +43,12 @@ import { WordsModule } from "./words/words.module"
         },
       }),
     }),
-    ThrottlerModule.forRoot([{ name: "default", ttl: 60_000, limit: 120 }]),
+    ThrottlerModule.forRootAsync({
+      inject: [AppConfig],
+      useFactory: (config: AppConfig) => [
+        { name: "default", ttl: 60_000, limit: config.get("RATE_LIMIT_PER_MINUTE") },
+      ],
+    }),
     DatabaseModule,
     CatalogModule,
     HealthModule,

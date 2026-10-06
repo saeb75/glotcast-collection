@@ -5,6 +5,7 @@ process.env.NODE_ENV = "test"
 process.env.LOG_LEVEL = "warn"
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL ?? adminUrl.replace(/\/[^/]*$/, "/glotcast_test")
 process.env.DATABASE_SSL = "false"
+process.env.RATE_LIMIT_PER_MINUTE = "100000" // one IP sends every request of a spec
 process.env.DATABASE_SSL_CA = ""
 process.env.STRAPI_DATABASE_URL = "" // = DATABASE_URL: the fixture's legacy tables live in its public schema
 process.env.STRAPI_PUBLIC_URL = "https://panel.example.com"

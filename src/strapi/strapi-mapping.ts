@@ -33,6 +33,7 @@ const num = (v: unknown): number | null => {
   return typeof n === "number" && Number.isFinite(n) ? n : null
 }
 const round = (n: number): number => Math.round(n * 1000) / 1000
+const text = (v: unknown): string => (typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : "")
 
 type RawChunk = {
   text?: unknown
@@ -67,13 +68,13 @@ export function normalizeTranscript(raw: unknown): NormalizedTranscript {
         : [c.start ?? c.startTime, c.end ?? c.endTime]
       const words = Array.isArray(c.words)
         ? (c.words as { text?: unknown; start?: unknown; end?: unknown }[]).map((w) => ({
-            text: String(w?.text ?? "").trim(),
+            text: text(w?.text),
             start: num(w?.start),
             end: num(w?.end),
           }))
         : null
       return {
-        text: String(c.text ?? "").trim(),
+        text: text(c.text),
         speaker: typeof c.speaker === "string" && c.speaker.trim() ? c.speaker.trim() : null,
         start: num(ts[0]),
         end: num(ts[1]),

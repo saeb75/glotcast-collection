@@ -4,7 +4,7 @@ import { createTestApp, LEGACY, type TestApp } from "./helpers"
 /** The public catalog, on content migrated from the Strapi fixture (real Strapi v5 rows). */
 describe("Catalog (e2e)", () => {
   let t: TestApp
-  const ids: Record<string, string> = {}
+  const ids = {} as Record<keyof typeof LEGACY, string>
   const known = (items: { id: string }[]) => {
     const names = new Map(Object.entries(ids).map(([k, v]) => [v, k]))
     return items.flatMap((i) => (names.has(i.id) ? [names.get(i.id)!] : []))
@@ -17,7 +17,7 @@ describe("Catalog (e2e)", () => {
       const res = await t.db.execute<{ id: string }>(
         `SELECT id FROM app.episodes WHERE legacy_document_id = '${doc}' UNION ALL SELECT id FROM app.podcasts WHERE legacy_document_id = '${doc}'` as never,
       )
-      if (res.rows[0]) ids[key] = res.rows[0].id
+      if (res.rows[0]) ids[key as keyof typeof LEGACY] = res.rows[0].id
     }
   })
 

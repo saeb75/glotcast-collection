@@ -12,7 +12,7 @@ import { ZodError } from "zod"
 
 /** HttpStatus.NOT_FOUND → "Not Found" (the HTTP reason phrase). */
 export const reasonPhrase = (status: number): string | undefined =>
-  (HttpStatus[status] as string | undefined)
+  HttpStatus[status]
     ?.split("_")
     .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
     .join(" ")
