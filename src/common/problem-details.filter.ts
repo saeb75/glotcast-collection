@@ -10,6 +10,13 @@ import { type Request, type Response } from "express"
 import { ZodSerializationException, ZodValidationException } from "nestjs-zod"
 import { ZodError } from "zod"
 
+/** HttpStatus.NOT_FOUND → "Not Found" (the HTTP reason phrase). */
+export const reasonPhrase = (status: number): string | undefined =>
+  (HttpStatus[status] as string | undefined)
+    ?.split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ")
+
 /** RFC 9457 problem details for every error; internal errors are logged, never leaked. */
 @Catch()
 export class ProblemDetailsFilter implements ExceptionFilter {
@@ -33,7 +40,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       status = exception.getStatus()
       const body = exception.getResponse()
-      title = HttpStatus[status]?.replaceAll("_", " ") ?? exception.name
+      title = reasonPhrase(status) ?? exception.name
       detail =
         typeof body === "string"
           ? body

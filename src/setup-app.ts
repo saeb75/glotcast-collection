@@ -1,4 +1,5 @@
 import { type INestApplication, VersioningType } from "@nestjs/common"
+import { type NestExpressApplication } from "@nestjs/platform-express"
 import { DocumentBuilder, type OpenAPIObject, SwaggerModule } from "@nestjs/swagger"
 import compression from "compression"
 import helmet from "helmet"
@@ -11,6 +12,9 @@ export function configureApp(app: INestApplication): void {
   const config = app.get(AppConfig)
   // URI versioning (/v1/...) — no global prefix, otherwise paths become /v1/v1.
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: "1" })
+  // A level's transcript with word timings (admin PUT …/levels/:level) is a few MB of JSON.
+  const express = app as NestExpressApplication
+  if (typeof express.useBodyParser === "function") express.useBodyParser("json", { limit: "15mb" })
   // Swagger UI needs inline scripts; the API itself only serves JSON.
   app.use(helmet({ contentSecurityPolicy: config.get("NODE_ENV") === "production" ? undefined : false }))
   app.enableCors({
