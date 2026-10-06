@@ -4,7 +4,7 @@ import { isoAt } from "../common/rows"
 import { DRIZZLE, type Database } from "../database/database.module"
 import { type Level, MOTIVATIONS, users } from "../database/schema/app"
 import { type DayTotal } from "./streak"
-import { type Me, type UpdateMe } from "./me.dto"
+import { type Me, PROFILE_FIELDS, type UpdateMe } from "./me.dto"
 
 type UserRow = {
   id: string
@@ -21,6 +21,13 @@ type UserRow = {
   motivation: string | null
   reminder_time: string | null
   feature_access: boolean
+  timezone: string | null
+  push_enabled: boolean
+  notify_reminders: boolean
+  notify_learning: boolean
+  notify_new_episodes: boolean
+  notify_news: boolean
+  pro_active: boolean
   created_at: Date | string
 }
 
@@ -41,11 +48,19 @@ export const toMe = (r: UserRow): Me => ({
     : null,
   reminderTime: r.reminder_time,
   featureAccess: r.feature_access,
+  timezone: r.timezone,
+  pushEnabled: r.push_enabled,
+  notifyReminders: r.notify_reminders,
+  notifyLearning: r.notify_learning,
+  notifyNewEpisodes: r.notify_new_episodes,
+  notifyNews: r.notify_news,
+  proActive: r.pro_active,
   createdAt: isoAt(r.created_at),
 })
 
 export const ME_COLUMNS = sql`id, is_anonymous, email, name, avatar_url, native_language, ui_language,
-  translation_language, level, daily_goal_min, interests, motivation, reminder_time, feature_access, created_at`
+  translation_language, level, daily_goal_min, interests, motivation, reminder_time, feature_access, timezone,
+  push_enabled, notify_reminders, notify_learning, notify_new_episodes, notify_news, pro_active, created_at`
 
 /** The caller's own rows: profile, listening days, counts behind the stats. */
 @Injectable()
@@ -57,12 +72,36 @@ export class MeRepository {
     return res.rows[0] ? toMe(res.rows[0]) : null
   }
 
+  /**
+   * Keys of UpdateMe are the property names of the users table; undefined values are left out by drizzle. Only a
+   * profile field marks the profile as set (claim-guest copies a guest's onboarding into an unset profile);
+   * device fields (time zone, push opt-in, Pro seen by the app) never do.
+   */
   async update(userId: string, patch: UpdateMe): Promise<void> {
-    // Keys of UpdateMe are the column names of the users table; undefined values are left out by drizzle.
+    const profile = PROFILE_FIELDS.some((key) => patch[key] !== undefined)
     await this.db
       .update(users)
-      .set({ ...patch, profileSetAt: sql`coalesce(${users.profileSetAt}, now())`, updatedAt: sql`now()` })
+      .set({
+        ...patch,
+        ...(profile ? { profileSetAt: sql`coalesce(${users.profileSetAt}, now())` } : {}),
+        ...(patch.pushEnabled !== undefined ? { pushUpdatedAt: sql`now()` } : {}),
+        ...(patch.proActive !== undefined ? { proActiveAt: sql`now()` } : {}),
+        updatedAt: sql`now()`,
+      })
       .where(eq(users.id, userId))
+  }
+
+  /** The newest send of the last 3 days with this ref (`PushData.ref`) was opened; nothing when there is none. */
+  async opened(userId: string, ref: string): Promise<void> {
+    await this.db.execute(sql`
+      UPDATE app.notification_sends SET opened_at = coalesce(opened_at, now())
+      WHERE id = (
+        SELECT id FROM app.notification_sends
+        WHERE user_id = ${userId} AND data->>'ref' = ${ref} AND created_at > now() - interval '3 days'
+          AND status IN ('sent', 'sending')
+        ORDER BY created_at DESC, id DESC LIMIT 1
+      )
+    `)
   }
 
   async days(userId: string): Promise<DayTotal[]> {

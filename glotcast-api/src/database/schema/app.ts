@@ -77,6 +77,17 @@ export const users = app
       motivation: text("motivation"),
       reminderTime: text("reminder_time"), // "HH:mm", the user's local time
       featureAccess: boolean("feature_access").notNull().default(false), // backend-granted Pro
+      // Push notifications: the device reports its IANA zone and its opt-in; the user switches the groups.
+      timezone: text("timezone"),
+      pushEnabled: boolean("push_enabled").notNull().default(false),
+      pushUpdatedAt: at("push_updated_at"),
+      notifyReminders: boolean("notify_reminders").notNull().default(true),
+      notifyLearning: boolean("notify_learning").notNull().default(true),
+      notifyNewEpisodes: boolean("notify_new_episodes").notNull().default(true),
+      notifyNews: boolean("notify_news").notNull().default(true),
+      // The app sees an active subscription (RevenueCat): campaign targeting only, never access.
+      proActive: boolean("pro_active").notNull().default(false),
+      proActiveAt: at("pro_active_at"),
       // First PATCH /v1/me: a claimed guest's onboarding answers replace an account's untouched defaults.
       profileSetAt: at("profile_set_at"),
       // The Strapi up_users row this account's legacy data (follows, words) was copied from.
@@ -90,6 +101,9 @@ export const users = app
     (t) => [
       index("users_email_idx").on(sql`lower(${t.email})`),
       index("users_created_idx").on(t.createdAt),
+      index("users_push_timezone_idx")
+        .on(t.timezone)
+        .where(sql`${t.pushEnabled}`),
       check(
         "users_motivation",
         sql`${t.motivation} IS NULL OR ${t.motivation} IN ('career', 'travel', 'exams', 'fun', 'other')`,
@@ -181,6 +195,11 @@ export const episodes = app
       isPro: boolean("is_pro").notNull().default(true),
       publishedAt: at("published_at"), // null = draft; in the future = scheduled
       legacyDocumentId: text("legacy_document_id"),
+      // Push the podcast's followers when it goes live (the admin's "notify followers").
+      notifyFollowers: boolean("notify_followers").notNull().default(true),
+      // When it was seen live by the scheduler (once; unpublishing never clears it): the followers' push is
+      // planned from here. The back catalog has it set to its publish date.
+      followersNotifiedAt: at("followers_notified_at"),
       createdAt: at("created_at").notNull().defaultNow(),
       updatedAt: at("updated_at").notNull().defaultNow(),
     },
@@ -188,6 +207,10 @@ export const episodes = app
       uniqueIndex("episodes_legacy_document_id_key").on(t.legacyDocumentId),
       index("episodes_podcast_number_idx").on(t.podcastId, t.number),
       index("episodes_published_idx").on(t.publishedAt.desc()),
+      index("episodes_followers_pending_idx")
+        .on(t.publishedAt)
+        .where(sql`${t.followersNotifiedAt} IS NULL`),
+      index("episodes_followers_notified_idx").on(t.followersNotifiedAt),
     ],
   )
   .enableRLS()
@@ -443,6 +466,177 @@ export const adminAudit = app
     (t) => [
       index("admin_audit_at_idx").on(t.at),
       index("admin_audit_target_idx").on(t.targetType, t.targetId),
+    ],
+  )
+  .enableRLS()
+
+/* ── Push notifications ─────────────────────────────────────────────────────────────────────────────────── */
+
+/** The automations' switches and parameters (src/notifications/settings.ts): one row (id = 1); all start off. */
+export const notificationSettings = app
+  .table(
+    "notification_settings",
+    {
+      id: smallint("id").primaryKey().default(1),
+      automations: jsonb("automations").$type<Record<string, unknown>>().notNull().default({}),
+      updatedAt: at("updated_at").notNull().defaultNow(),
+      updatedBy: uuid("updated_by"),
+    },
+    (t) => [check("notification_settings_single_row", sql`${t.id} = 1`)],
+  )
+  .enableRLS()
+
+/**
+ * Named leases for the background jobs (several API instances, one runner). Session advisory locks don't survive
+ * Supabase's transaction pooler, so a row is taken with INSERT … ON CONFLICT … WHERE locked_until < now.
+ * `watermark` = where the last completed run got to.
+ */
+export const jobLeases = app
+  .table("job_leases", {
+    name: text("name").primaryKey(),
+    holder: text("holder"),
+    lockedUntil: at("locked_until")
+      .notNull()
+      .default(sql`'-infinity'`),
+    watermark: at("watermark"),
+    updatedAt: at("updated_at").notNull().defaultNow(),
+  })
+  .enableRLS()
+
+export const CAMPAIGN_STATUSES = ["draft", "scheduled", "sending", "sent", "canceled", "failed"] as const
+
+/** Admin campaigns: a message per app language, an audience, a link, and when to deliver it. */
+export const notificationCampaigns = app
+  .table(
+    "notification_campaigns",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      name: text("name").notNull(),
+      status: text("status").notNull().default("draft"),
+      sourceLanguage: text("source_language").notNull().default("en"),
+      messages: jsonb("messages")
+        .$type<Record<string, { title: string; body: string }>>()
+        .notNull()
+        .default({}),
+      audience: jsonb("audience").$type<Record<string, unknown>>().notNull().default({ segment: "all" }),
+      link: jsonb("link").$type<Record<string, unknown>>().notNull().default({ type: "home" }),
+      imageUrl: text("image_url"),
+      respectQuietHours: boolean("respect_quiet_hours").notNull().default(true),
+      delivery: jsonb("delivery").$type<Record<string, unknown>>(),
+      // When the campaign is expanded into sends (now / the chosen instant / the first time zone to reach it).
+      sendAt: at("send_at"),
+      recipients: integer("recipients"),
+      sentAt: at("sent_at"),
+      createdBy: uuid("created_by"),
+      createdByEmail: text("created_by_email"),
+      createdAt: at("created_at").notNull().defaultNow(),
+      updatedAt: at("updated_at").notNull().defaultNow(),
+    },
+    (t) => [
+      index("notification_campaigns_due_idx")
+        .on(t.sendAt)
+        .where(sql`${t.status} = 'scheduled'`),
+      index("notification_campaigns_created_idx").on(t.createdAt),
+      check(
+        "notification_campaigns_status",
+        sql`${t.status} IN ('draft', 'scheduled', 'sending', 'sent', 'canceled', 'failed')`,
+      ),
+    ],
+  )
+  .enableRLS()
+
+/** One OneSignal request: its id is the request's idempotency key (a retry after a crash reuses it). */
+export const notificationBatches = app
+  .table(
+    "notification_batches",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      onesignalId: text("onesignal_id"),
+      campaignId: uuid("campaign_id").references(() => notificationCampaigns.id, { onDelete: "cascade" }),
+      kind: text("kind").notNull(),
+      language: text("language").notNull(),
+      recipients: integer("recipients").notNull(),
+      status: text("status").notNull().default("pending"), // pending | sent | failed | empty
+      error: text("error"),
+      attempts: integer("attempts").notNull().default(0),
+      stats: jsonb("stats").$type<Record<string, number>>(),
+      statsAt: at("stats_at"),
+      createdAt: at("created_at").notNull().defaultNow(),
+      sentAt: at("sent_at"),
+    },
+    (t) => [
+      index("notification_batches_pending_idx")
+        .on(t.createdAt)
+        .where(sql`${t.status} = 'pending'`),
+      index("notification_batches_campaign_idx").on(t.campaignId),
+      index("notification_batches_created_idx").on(t.createdAt),
+      check("notification_batches_status", sql`${t.status} IN ('pending', 'sent', 'failed', 'empty')`),
+    ],
+  )
+  .enableRLS()
+
+/**
+ * The outbox and the log: one row per user and push (or a decision not to push, `skipped`). Rendered in the
+ * user's language when planned; the dispatcher groups identical payloads into OneSignal batches. The unique
+ * indexes make a double send impossible: one automation of a kind per user and local day, one daily-slot push
+ * (reminder / learning / streak saver) per user and local day, one row per campaign and user.
+ */
+export const notificationSends = app
+  .table(
+    "notification_sends",
+    {
+      id: bigserial("id", { mode: "number" }).primaryKey(),
+      userId: uuid("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+      kind: text("kind").notNull(), // reminder | streak_saver | learning | new_episodes | campaign | test
+      grp: text("grp").notNull(), // habit | learning | content | campaign | test
+      dailySlot: boolean("daily_slot").notNull().default(false),
+      campaignId: uuid("campaign_id").references(() => notificationCampaigns.id, { onDelete: "cascade" }),
+      batchId: uuid("batch_id").references(() => notificationBatches.id, { onDelete: "set null" }),
+      localDate: date("local_date", { mode: "string" }).notNull(),
+      dueAt: at("due_at").notNull(),
+      status: text("status").notNull().default("queued"),
+      skipReason: text("skip_reason"),
+      language: text("language").notNull(),
+      variant: text("variant"),
+      title: text("title").notNull(),
+      body: text("body").notNull(),
+      data: jsonb("data").$type<Record<string, unknown>>().notNull(),
+      imageUrl: text("image_url"),
+      payloadHash: text("payload_hash").notNull(),
+      episodeIds: uuid("episode_ids")
+        .array()
+        .notNull()
+        .default(sql`'{}'::uuid[]`),
+      createdAt: at("created_at").notNull().defaultNow(),
+      sentAt: at("sent_at"),
+      openedAt: at("opened_at"),
+    },
+    (t) => [
+      uniqueIndex("notification_sends_automation_key")
+        .on(t.userId, t.kind, t.localDate)
+        .where(sql`${t.campaignId} IS NULL AND ${t.grp} <> 'test'`),
+      uniqueIndex("notification_sends_daily_slot_key")
+        .on(t.userId, t.localDate)
+        .where(sql`${t.dailySlot}`),
+      uniqueIndex("notification_sends_campaign_key")
+        .on(t.campaignId, t.userId)
+        .where(sql`${t.campaignId} IS NOT NULL`),
+      index("notification_sends_queued_idx")
+        .on(t.dueAt)
+        .where(sql`${t.status} = 'queued'`),
+      index("notification_sends_batch_idx")
+        .on(t.batchId)
+        .where(sql`${t.batchId} IS NOT NULL`),
+      index("notification_sends_user_day_idx").on(t.userId, t.localDate),
+      index("notification_sends_user_created_idx").on(t.userId, t.createdAt),
+      index("notification_sends_created_idx").on(t.createdAt),
+      check(
+        "notification_sends_status",
+        sql`${t.status} IN ('queued', 'sending', 'sent', 'failed', 'unreachable', 'expired', 'canceled', 'skipped')`,
+      ),
+      check("notification_sends_grp", sql`${t.grp} IN ('habit', 'learning', 'content', 'campaign', 'test')`),
     ],
   )
   .enableRLS()

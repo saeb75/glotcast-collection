@@ -63,6 +63,15 @@ export const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_IMAGE_MODEL: z.string().default("gemini-3.1-flash-image-preview"),
+
+  // Push notifications. The API decides who gets which push and when; OneSignal only delivers (REST API v2).
+  // OneSignal dashboard → Settings → Keys & IDs: the App ID and an App API key. Unset = sending answers 503.
+  ONESIGNAL_APP_ID: z.string().optional(),
+  ONESIGNAL_API_KEY: z.string().optional(),
+  // The scheduler (every 5 minutes): nothing is planned or sent until this is true, whatever the automations say.
+  NOTIFICATIONS_ENABLED: z.stringbool().default(false),
+  // Parallel OneSignal requests while dispatching.
+  ONESIGNAL_CONCURRENCY: z.coerce.number().int().positive().max(32).default(4),
 })
 
 export type Env = z.infer<typeof envSchema>

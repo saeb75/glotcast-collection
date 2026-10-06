@@ -14,7 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common"
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
+import { ApiBearerAuth, ApiBody, ApiTags } from "@nestjs/swagger"
 import { ZodResponse } from "nestjs-zod"
 import { AdminGuard } from "../admin.guard"
 import { Audit } from "../audit/audit.decorator"
@@ -26,13 +26,23 @@ import {
   AdminEpisodesQueryDto,
   CreateEpisodeDto,
   LevelParamDto,
+  PublishEpisodeDto,
   PutLevelDto,
   UpdateEpisodeDto,
 } from "./episodes.dto"
 import { AdminEpisodesService } from "./episodes.service"
 
 const uuid = new ParseUUIDPipe()
-const FIELDS = ["podcastId", "title", "number", "isPro", "publishedAt", "coverUrl", "bannerUrl"]
+const FIELDS = [
+  "podcastId",
+  "title",
+  "number",
+  "isPro",
+  "publishedAt",
+  "coverUrl",
+  "bannerUrl",
+  "notifyFollowers",
+]
 
 @ApiTags("admin")
 @ApiBearerAuth()
@@ -80,12 +90,14 @@ export class AdminEpisodesController {
     await this.episodes.remove(id)
   }
 
+  /** Live now; `notifyFollowers` (optional body) sets whether its followers get a push. */
   @Post(":id/publish")
   @HttpCode(200)
-  @Audit({ action: "episode.publish", target: { type: "episode", param: "id" } })
+  @Audit({ action: "episode.publish", target: { type: "episode", param: "id" }, body: ["notifyFollowers"] })
+  @ApiBody({ type: PublishEpisodeDto, required: false })
   @ZodResponse({ type: AdminEpisodeDto, status: 200 })
-  publish(@Param("id", uuid) id: string) {
-    return this.episodes.publish(id)
+  publish(@Param("id", uuid) id: string, @Body() body: PublishEpisodeDto) {
+    return this.episodes.publish(id, body ?? {})
   }
 
   @Post(":id/unpublish")

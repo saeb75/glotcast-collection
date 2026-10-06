@@ -1,7 +1,9 @@
 import { Module } from "@nestjs/common"
 import { HomeModule } from "../home/home.module"
 import { MeModule } from "../me/me.module"
+import { NotificationsCoreModule } from "../notifications/notifications-core.module"
 import { R2Storage } from "../storage/r2.service"
+import { TranslateModule } from "../translate/translate.module"
 import { UsersModule } from "../users/users.module"
 import { AdminGuard } from "./admin.guard"
 import { AdminAuditController } from "./audit/audit.controller"
@@ -22,6 +24,11 @@ import { AdminHomeConfigService } from "./home-config/home-config.service"
 import { AdminListsController } from "./lists/lists.controller"
 import { AdminListsService } from "./lists/lists.service"
 import { AdminMediaController } from "./media/media.controller"
+import { AdminAutomationsController } from "./notifications/automations.controller"
+import { AdminCampaignsController } from "./notifications/campaigns.controller"
+import { AdminCampaignsService } from "./notifications/campaigns.service"
+import { AdminNotificationsService } from "./notifications/notifications.service"
+import { AdminSendsController } from "./notifications/sends.controller"
 import { AdminPodcastsController } from "./podcasts/podcasts.controller"
 import { AdminPodcastsRepository } from "./podcasts/podcasts.repository"
 import { AdminPodcastsService } from "./podcasts/podcasts.service"
@@ -33,7 +40,7 @@ import { AdminUsersService } from "./users/users.service"
 
 /** /v1/admin: content management and the content pipeline, for admins only; every write is audited. */
 @Module({
-  imports: [UsersModule, MeModule, HomeModule],
+  imports: [UsersModule, MeModule, HomeModule, TranslateModule, NotificationsCoreModule],
   controllers: [
     AdminDashboardController,
     AdminPodcastsController,
@@ -46,6 +53,9 @@ import { AdminUsersService } from "./users/users.service"
     AdminTranscribeController,
     AdminCoversController,
     AdminAuditController,
+    AdminCampaignsController,
+    AdminAutomationsController,
+    AdminSendsController,
   ],
   providers: [
     AdminGuard,
@@ -65,6 +75,8 @@ import { AdminUsersService } from "./users/users.service"
     AdminTranscribeService,
     ImageModels,
     AdminCoversService,
+    AdminNotificationsService,
+    AdminCampaignsService,
   ],
 })
 export class AdminModule {}

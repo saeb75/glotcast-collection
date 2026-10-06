@@ -4,6 +4,7 @@ import { type PageQuery, offsetOf, toPage } from "../../common/pagination"
 import { isForeignKeyViolation } from "../../common/rows"
 import { DRIZZLE, type Database } from "../../database/database.module"
 import { type Level } from "../../database/schema/app"
+import { NotificationEvents } from "../../notifications/events.service"
 import { type AdminEpisode, type AdminEpisodeDetail, type EpisodeInput, type PutLevel } from "./episodes.dto"
 import { AdminEpisodesRepository, type EpisodeFilter } from "./episodes.repository"
 
@@ -12,6 +13,7 @@ export class AdminEpisodesService {
   constructor(
     @Inject(DRIZZLE) private readonly db: Database,
     private readonly repo: AdminEpisodesRepository,
+    private readonly notifications: NotificationEvents,
   ) {}
 
   async page(q: PageQuery & EpisodeFilter) {
@@ -34,11 +36,15 @@ export class AdminEpisodesService {
   async create(input: EpisodeInput & { podcastId: string; title: string }): Promise<AdminEpisodeDetail> {
     try {
       const res = await this.db.execute<{ id: string }>(sql`
-        INSERT INTO app.episodes (podcast_id, number, title, description, cover_url, banner_url, is_pro, published_at)
+        INSERT INTO app.episodes (podcast_id, number, title, description, cover_url, banner_url, is_pro, published_at,
+                                  notify_followers)
         VALUES (${input.podcastId}, ${input.number ?? null}, ${input.title}, ${input.description ?? null},
-                ${input.coverUrl ?? null}, ${input.bannerUrl ?? null}, ${input.isPro ?? true}, ${input.publishedAt ?? null})
+                ${input.coverUrl ?? null}, ${input.bannerUrl ?? null}, ${input.isPro ?? true}, ${input.publishedAt ?? null},
+                ${input.notifyFollowers ?? true})
         RETURNING id
       `)
+      if (input.publishedAt && Date.parse(input.publishedAt) <= Date.now())
+        this.notifications.episodePublished()
       return this.detail(res.rows[0]!.id)
     } catch (err) {
       if (isForeignKeyViolation(err)) throw new BadRequestException(`podcast ${input.podcastId} not found`)
@@ -57,6 +63,7 @@ export class AdminEpisodesService {
       input.bannerUrl !== undefined && sql`banner_url = ${input.bannerUrl}`,
       input.isPro !== undefined && sql`is_pro = ${input.isPro}`,
       input.publishedAt !== undefined && sql`published_at = ${input.publishedAt}`,
+      input.notifyFollowers !== undefined && sql`notify_followers = ${input.notifyFollowers}`,
     ].filter((s) => s !== false)
     try {
       await this.db.execute(
@@ -66,6 +73,8 @@ export class AdminEpisodesService {
       if (isForeignKeyViolation(err)) throw new BadRequestException(`podcast ${input.podcastId} not found`)
       throw err
     }
+    if (input.publishedAt && Date.parse(input.publishedAt) <= Date.now())
+      this.notifications.episodePublished()
     return this.detail(id)
   }
 
@@ -80,18 +89,24 @@ export class AdminEpisodesService {
     })
   }
 
-  /** Live from now (a draft or a scheduled episode); an already published one keeps its date. */
-  async publish(id: string): Promise<AdminEpisode> {
+  /**
+   * Live from now (a draft or a scheduled episode); an already published one keeps its date. Its followers get a
+   * push once it is seen live (`notifyFollowers`, unless switched off) — never again after an unpublish/publish.
+   */
+  async publish(id: string, opts: { notifyFollowers?: boolean } = {}): Promise<AdminEpisode> {
     await this.get(id)
     await this.db.execute(sql`
       UPDATE app.episodes SET published_at = CASE WHEN published_at IS NULL OR published_at > now() THEN now()
                                                     ELSE published_at END,
+                              ${opts.notifyFollowers !== undefined ? sql`notify_followers = ${opts.notifyFollowers},` : sql``}
                               updated_at = now()
       WHERE id = ${id}
     `)
+    this.notifications.episodePublished()
     return this.get(id)
   }
 
+  /** Back to draft. `followers_notified_at` stays: publishing it again never pushes the followers twice. */
   async unpublish(id: string): Promise<AdminEpisode> {
     await this.get(id)
     await this.db.execute(

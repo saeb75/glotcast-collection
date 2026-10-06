@@ -33,6 +33,8 @@ export const adminEpisodeSchema = z
     levels: z.array(adminEpisodeLevelSchema),
     createdAt: at,
     updatedAt: at,
+    notifyFollowers: z.boolean().describe("push the podcast's followers when it goes live"),
+    followersNotifiedAt: nullableAt.describe("when it went live for the followers' push (once)"),
   })
   .meta({ id: "AdminEpisode" })
 export type AdminEpisode = z.infer<typeof adminEpisodeSchema>
@@ -61,6 +63,7 @@ const fields = {
     .nullable()
     .optional()
     .describe("schedule (future) or backdate; null = draft. POST …/publish publishes now"),
+  notifyFollowers: z.boolean().optional().describe("default true: push followers when it goes live"),
 }
 export const createEpisodeSchema = z.object(fields)
 export const updateEpisodeSchema = z.object(fields).partial()
@@ -91,4 +94,15 @@ export class AdminEpisodesQueryDto extends createZodDto(
 export class CreateEpisodeDto extends createZodDto(createEpisodeSchema) {}
 export class UpdateEpisodeDto extends createZodDto(updateEpisodeSchema) {}
 export class PutLevelDto extends createZodDto(putLevelSchema) {}
+// The body is optional: no body (Express leaves it undefined) = {}.
+export class PublishEpisodeDto extends createZodDto(
+  z
+    .object({
+      notifyFollowers: z
+        .boolean()
+        .optional()
+        .describe("push the followers when it goes live (kept when absent)"),
+    })
+    .default({}),
+) {}
 export class LevelParamDto extends createZodDto(z.object({ id: z.uuid(), level: levelSchema })) {}

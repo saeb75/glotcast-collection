@@ -22,5 +22,9 @@ for (const key of [
   "ASSEMBLYAI_API_KEY",
   "OPENAI_API_KEY",
   "GEMINI_API_KEY",
+  "ONESIGNAL_APP_ID",
+  "ONESIGNAL_API_KEY",
+  "NOTIFICATIONS_ENABLED",
+  "ONESIGNAL_CONCURRENCY",
 ])
   process.env[key] = ""

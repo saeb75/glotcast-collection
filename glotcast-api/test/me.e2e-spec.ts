@@ -56,6 +56,13 @@ describe("Me (e2e)", () => {
       motivation: null,
       reminderTime: null,
       featureAccess: false,
+      timezone: null,
+      pushEnabled: false,
+      notifyReminders: true,
+      notifyLearning: true,
+      notifyNewEpisodes: true,
+      notifyNews: true,
+      proActive: false,
       createdAt: expect.any(String),
     })
     const guest = randomUUID()
@@ -120,6 +127,7 @@ describe("Me (e2e)", () => {
       },
       today: { date: "2026-10-05", seconds: 30 },
       goalMetNow: false,
+      milestone: null,
     })
     // 500 s since the last heartbeat is clamped to 120; 59 s of 61.25 is past 95 %.
     const second = await t

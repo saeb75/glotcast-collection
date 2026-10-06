@@ -178,13 +178,16 @@ export class MigrateStrapiService {
       }
       const res = await tx.execute<{ id: string; inserted: boolean }>(sql`
         INSERT INTO app.episodes (podcast_id, number, title, description, cover_url, banner_url, is_pro, published_at,
-                                  legacy_document_id, created_at)
+                                  legacy_document_id, created_at, followers_notified_at)
         VALUES (${podcastId}, ${e.episodeNumber}, ${e.title?.trim() || "Untitled episode"}, ${e.description?.trim() || null},
                 ${absoluteUrl(e.image, base)}, ${absoluteUrl(e.bannerUrl, base)}, ${e.isPro ?? true}, ${e.publishedAt},
-                ${e.documentId}, ${e.createdAt ?? e.publishedAt})
+                ${e.documentId}, ${e.createdAt ?? e.publishedAt},
+                -- Already live in Strapi: the back catalog never pushes the followers.
+                CASE WHEN ${e.publishedAt}::timestamptz <= now() THEN ${e.publishedAt}::timestamptz END)
         ON CONFLICT (legacy_document_id) DO UPDATE SET podcast_id = excluded.podcast_id, number = excluded.number,
           title = excluded.title, description = excluded.description, cover_url = excluded.cover_url,
           banner_url = excluded.banner_url, is_pro = excluded.is_pro, published_at = excluded.published_at,
+          followers_notified_at = coalesce(app.episodes.followers_notified_at, excluded.followers_notified_at),
           updated_at = now()
         RETURNING id, (xmax = 0) AS inserted
       `)

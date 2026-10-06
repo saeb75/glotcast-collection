@@ -26,6 +26,8 @@ type Row = {
   is_pro: boolean
   published_at: Stamp
   legacy_document_id: string | null
+  notify_followers: boolean
+  followers_notified_at: Stamp
   created_at: Date | string
   updated_at: Date | string
   podcast_id: string
@@ -35,7 +37,8 @@ type Row = {
 
 const SELECT = sql`
   SELECT e.id, e.number, e.title, e.description, e.cover_url, e.banner_url, e.is_pro, e.published_at,
-         e.legacy_document_id, e.created_at, e.updated_at, p.id AS podcast_id, p.name AS podcast_name,
+         e.legacy_document_id, e.notify_followers, e.followers_notified_at, e.created_at, e.updated_at,
+         p.id AS podcast_id, p.name AS podcast_name,
          coalesce((
            SELECT json_agg(json_build_object(
                     'level', l.level, 'audioUrl', l.audio_url, 'durationSec', l.duration_sec,
@@ -62,6 +65,8 @@ const toEpisode = (r: Row): AdminEpisode => ({
   levels: r.levels.map((l) => ({ ...l, durationSec: Number(l.durationSec), updatedAt: isoAt(l.updatedAt) })),
   createdAt: isoAt(r.created_at),
   updatedAt: isoAt(r.updated_at),
+  notifyFollowers: r.notify_followers,
+  followersNotifiedAt: iso(r.followers_notified_at),
 })
 
 export interface EpisodeFilter {

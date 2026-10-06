@@ -9,6 +9,12 @@ import { AdminRolesModule } from "../src/admin/admin-roles.module"
 import { AppModule } from "../src/app.module"
 import { AUTH_KEYS } from "../src/auth/auth-verifier"
 import { DRIZZLE, type Database } from "../src/database/database.module"
+import {
+  OneSignalClient,
+  type OneSignalMessage,
+  type OneSignalResult,
+  type OneSignalStats,
+} from "../src/notifications/onesignal.client"
 import { configureApp } from "../src/setup-app"
 import { R2Storage } from "../src/storage/r2.service"
 import { MigrateStrapiService } from "../src/strapi/migrate-strapi.service"
@@ -30,11 +36,12 @@ export class FakeSupabaseAdmin {
   }
 }
 
-/** Google Translate: "[tr] text", and counts the texts it was asked for. */
+/** Google Translate: "[tr] text", and records what it was asked for. */
 export class FakeTranslate {
-  calls: { texts: string[]; target: string }[] = []
-  translate(texts: string[], target: string): Promise<string[]> {
-    this.calls.push({ texts, target })
+  readonly configured = true
+  calls: { texts: string[]; target: string; source: string }[] = []
+  translate(texts: string[], target: string, source = "en"): Promise<string[]> {
+    this.calls.push({ texts, target, source })
     return Promise.resolve(texts.map((t) => `[${target}] ${t}`))
   }
 }
@@ -111,6 +118,31 @@ export class FakeAssemblyAi {
   }
 }
 
+/**
+ * OneSignal: records every request; `subscribed = false` or an id in `invalid` makes users unreachable, like the
+ * real API answers (`invalid_aliases`, "All included players are not subscribed").
+ */
+export class FakeOneSignal {
+  configured = true
+  sent: OneSignalMessage[] = []
+  invalid = new Set<string>()
+  stats: OneSignalStats = { successful: 3, failed: 1, errored: 0, converted: 2, received: 3 }
+  send(m: OneSignalMessage): Promise<OneSignalResult> {
+    this.sent.push(m)
+    const invalid = m.externalIds.filter((id) => this.invalid.has(id))
+    if (invalid.length === m.externalIds.length)
+      return Promise.resolve({ id: null, invalidExternalIds: m.externalIds, notSubscribed: true })
+    return Promise.resolve({ id: `os-${this.sent.length}`, invalidExternalIds: invalid, notSubscribed: false })
+  }
+  get(): Promise<OneSignalStats> {
+    return Promise.resolve(this.stats)
+  }
+  /** The requests that reached one user. */
+  to(userId: string): OneSignalMessage[] {
+    return this.sent.filter((m) => m.externalIds.includes(userId))
+  }
+}
+
 export class FakeImageModels {
   chat(system: string, user: string): Promise<string> {
     return Promise.resolve(`A cover for "{episode}" of "{podcast}" (${system.length}/${user.length})`)
@@ -134,6 +166,7 @@ export interface TestApp {
     translate: FakeTranslate
     storage: FakeStorage
     assemblyai: FakeAssemblyAi
+    onesignal: FakeOneSignal
   }
   migrate: () => Promise<void>
   close: () => Promise<void>
@@ -158,6 +191,7 @@ export async function createTestApp(
     translate: new FakeTranslate(),
     storage: new FakeStorage(),
     assemblyai: new FakeAssemblyAi(),
+    onesignal: new FakeOneSignal(),
   }
   // The CLI-only modules (migrate-strapi, admin grant) are tested through the same app.
   let builder = Test.createTestingModule({ imports: [AppModule, StrapiModule, AdminRolesModule] })
@@ -175,6 +209,8 @@ export async function createTestApp(
     .useValue(fakes.assemblyai)
     .overrideProvider(ImageModels)
     .useValue(new FakeImageModels())
+    .overrideProvider(OneSignalClient)
+    .useValue(fakes.onesignal)
   if (customize) builder = customize(builder)
   const moduleRef = await builder.compile()
   const app = moduleRef.createNestApplication({ logger: ["error"] })

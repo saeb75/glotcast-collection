@@ -135,16 +135,37 @@ export class UsersService {
               ELSE coalesce(${sql.raw(`u.${column}`)}, ${sql.raw(`g.${column}`)}) END`
         await tx.execute(sql`
           UPDATE app.users u SET
-            ${take("native_language")}, ${take("ui_language")}, ${take("translation_language")},
+            ${take("native_language")}, ${take("translation_language")},
+            -- The app's display language is synced as a device field: never cleared by a guest that has none.
+            ui_language = CASE WHEN ${fresh} THEN coalesce(g.ui_language, u.ui_language)
+                          ELSE coalesce(u.ui_language, g.ui_language) END,
             ${take("motivation")}, ${take("reminder_time")},
             level = CASE WHEN ${fresh} THEN g.level ELSE u.level END,
             daily_goal_min = CASE WHEN ${fresh} THEN g.daily_goal_min ELSE u.daily_goal_min END,
             interests = CASE WHEN ${fresh} OR cardinality(u.interests) = 0 THEN g.interests ELSE u.interests END,
             profile_set_at = coalesce(u.profile_set_at, g.profile_set_at),
             feature_access = u.feature_access OR g.feature_access,
+            timezone = coalesce(u.timezone, g.timezone),
+            -- The device that signed in reported its push opt-in as the guest: the newer report wins.
+            push_enabled = CASE WHEN g.push_updated_at > coalesce(u.push_updated_at, '-infinity')
+                                THEN g.push_enabled ELSE u.push_enabled END,
+            push_updated_at = greatest(u.push_updated_at, g.push_updated_at),
             updated_at = now()
           FROM app.users g
           WHERE u.id = ${to} AND g.id = ${from}
+        `)
+        // The guest's pushes of the last day count toward the account's caps (and a queued one still goes out).
+        await tx.execute(sql`
+          INSERT INTO app.notification_sends (user_id, kind, grp, daily_slot, campaign_id, local_date, due_at,
+            status, skip_reason, language, variant, title, body, data, image_url, payload_hash, episode_ids,
+            created_at, sent_at, opened_at)
+          SELECT ${to}::uuid, kind, grp, daily_slot, campaign_id, local_date, due_at,
+                 CASE WHEN status = 'sending' THEN 'sent' ELSE status END, skip_reason, language, variant, title,
+                 body, data, image_url, payload_hash, episode_ids, created_at, sent_at, opened_at
+          FROM app.notification_sends
+          WHERE user_id = ${from} AND grp <> 'test' AND created_at > now() - interval '36 hours'
+          ORDER BY id
+          ON CONFLICT DO NOTHING
         `)
         await tx.delete(users).where(eq(users.id, from)) // the rest of its rows go with it
         moved.progress = progress.rowCount ?? 0

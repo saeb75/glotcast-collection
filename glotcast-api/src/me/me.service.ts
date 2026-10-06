@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common"
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common"
 import { sql } from "drizzle-orm"
 import { type AuthClaims } from "../auth/auth-verifier"
 import { CatalogRepository } from "../catalog/catalog.repository"
@@ -10,7 +10,9 @@ import { UsersService } from "../users/users.service"
 import { type Me, type Stats, type UpdateMe } from "./me.dto"
 import { MeRepository } from "./me.repository"
 import { type ProgressStatus, ProgressRepository, toLevelProgress } from "./progress.repository"
-import { clampListened, crossesGoal, isCompleted, lastDays, streaks } from "./streak"
+import { milestoneOf } from "../notifications/rules"
+import { clampListened, crossesGoal, isCompleted, lastDays, STREAK_MIN_SECONDS, streaks } from "./streak"
+import { Timezones } from "./timezones"
 
 export interface Heartbeat {
   episodeId: string
@@ -29,6 +31,7 @@ export class MeService {
     private readonly progress: ProgressRepository,
     private readonly catalog: CatalogRepository,
     private readonly users: UsersService,
+    private readonly timezones: Timezones,
   ) {}
 
   async me(userId: string): Promise<Me> {
@@ -38,8 +41,15 @@ export class MeService {
   }
 
   async update(userId: string, patch: UpdateMe): Promise<Me> {
+    if (patch.timezone && !(await this.timezones.isKnown(patch.timezone)))
+      throw new BadRequestException(`unknown time zone ${patch.timezone}`)
     if (Object.values(patch).some((v) => v !== undefined)) await this.repo.update(userId, patch)
     return this.me(userId)
+  }
+
+  /** A tapped push (`PushData.ref`). */
+  notificationOpened(userId: string, ref: string): Promise<void> {
+    return this.repo.opened(userId, ref)
   }
 
   delete(userId: string): Promise<void> {
@@ -114,10 +124,25 @@ export class MeService {
       `)
       const after = Number(day.rows[0]!.seconds)
       const goal = Number(day.rows[0]!.goal ?? 600)
+      // The heartbeat that makes today a streak day: a milestone streak (7, 30, 100, 365) is celebrated in the app.
+      let milestone: number | null = null
+      if (listened > 0 && crossesGoal(after - listened, after, STREAK_MIN_SECONDS)) {
+        const days = await tx.execute<{ date: string; seconds: number }>(sql`
+          SELECT date::text AS date, seconds FROM app.listening_days
+          WHERE user_id = ${userId} AND seconds >= ${STREAK_MIN_SECONDS} AND date <= ${beat.date}::date
+            AND date > ${beat.date}::date - 400
+        `)
+        const { streakDays } = streaks(
+          days.rows.map((d) => ({ date: d.date, seconds: Number(d.seconds) })),
+          beat.date,
+        )
+        milestone = milestoneOf(streakDays)
+      }
       return {
         progress: toLevelProgress(progress.rows[0]!),
         today: { date: beat.date, seconds: Math.round(after) },
         goalMetNow: listened > 0 && crossesGoal(after - listened, after, goal),
+        milestone,
       }
     })
   }

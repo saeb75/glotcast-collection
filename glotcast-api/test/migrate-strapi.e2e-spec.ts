@@ -94,6 +94,11 @@ describe("migrate-strapi (e2e)", () => {
       sql`SELECT slug FROM app.podcasts WHERE legacy_document_id IS NOT NULL ORDER BY slug`,
     )
     expect(slugs.rows.map((r) => r.slug)).toEqual(["around-the-world", "cafe-science"])
+    // The back catalog is already announced: its followers are never pushed.
+    const pending = await t.db.execute<{ n: number }>(sql`
+      SELECT count(*)::int AS n FROM app.episodes
+      WHERE legacy_document_id IS NOT NULL AND followers_notified_at IS DISTINCT FROM published_at`)
+    expect(pending.rows[0]!.n).toBe(0)
   })
 
   it("picks up Strapi edits: a changed transcript drops its translations, a removed level goes", async () => {

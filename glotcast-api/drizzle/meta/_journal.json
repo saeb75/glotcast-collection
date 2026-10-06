@@ -15,6 +15,20 @@
       "when": 1791301933254,
       "tag": "0001_search",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791319356986,
+      "tag": "0002_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791319365593,
+      "tag": "0003_notifications_seed",
+      "breakpoints": true
     }
   ]
 }

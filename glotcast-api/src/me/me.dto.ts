@@ -36,6 +36,15 @@ export const meSchema = z
     motivation: z.enum(MOTIVATIONS).nullable(),
     reminderTime: nullableString().describe('"HH:mm", local time'),
     featureAccess: z.boolean().describe("backend-granted Pro"),
+    timezone: nullableString().describe('IANA zone reported by the device, e.g. "Europe/Istanbul"'),
+    pushEnabled: z.boolean().describe("the device is opted in to push (OneSignal)"),
+    notifyReminders: z.boolean().describe("daily reminder + streak saver"),
+    notifyLearning: z.boolean().describe("words due, finish an episode, weekly recap"),
+    notifyNewEpisodes: z.boolean().describe("new episodes of followed podcasts"),
+    notifyNews: z.boolean().describe("admin campaigns: news & offers"),
+    proActive: z
+      .boolean()
+      .describe("the app sees an active subscription; targeting only, never grants access"),
     createdAt: z.string(),
   })
   .meta({ id: "Me" })
@@ -55,9 +64,32 @@ export const updateMeSchema = z
       .string()
       .regex(/^([01]\d|2[0-3]):[0-5]\d$/, '"HH:mm"')
       .nullable(),
+    // Device and notification fields (with uiLanguage above): they never mark the profile as set.
+    timezone: z.string().trim().min(1).max(64).nullable().describe("IANA zone; an unknown one is a 400"),
+    pushEnabled: z.boolean(),
+    notifyReminders: z.boolean(),
+    notifyLearning: z.boolean(),
+    notifyNewEpisodes: z.boolean(),
+    notifyNews: z.boolean(),
+    proActive: z.boolean(),
   })
   .partial()
 export type UpdateMe = z.infer<typeof updateMeSchema>
+
+/**
+ * The PATCH fields that are the user's profile (onboarding answers). The rest describe the device — the app syncs
+ * `uiLanguage` (its display language), the time zone, the push opt-in and the toggles on every launch.
+ */
+export const PROFILE_FIELDS = [
+  "name",
+  "nativeLanguage",
+  "translationLanguage",
+  "level",
+  "dailyGoalMin",
+  "interests",
+  "motivation",
+  "reminderTime",
+] as const satisfies readonly (keyof UpdateMe)[]
 
 export const dayStatsSchema = z
   .object({ date: z.string().describe('the user\'s local "YYYY-MM-DD"'), seconds: z.number() })
@@ -114,7 +146,17 @@ export class ListeningResultDto extends createZodDto(
     progress: levelProgressSchema,
     today: dayStatsSchema,
     goalMetNow: z.boolean().describe("true only on the heartbeat that crosses the daily goal"),
+    milestone: z
+      .number()
+      .int()
+      .nullable()
+      .describe(
+        "7, 30, 100 or 365: the streak reached on the heartbeat that makes today a streak day, else null",
+      ),
   }),
+) {}
+export class NotificationOpenedDto extends createZodDto(
+  z.object({ ref: z.string().trim().min(1).max(80).describe("PushData.ref of the tapped push") }),
 ) {}
 export class ProgressQueryDto extends createZodDto(
   z.object({ status: z.enum(["in_progress", "completed", "all"]).default("all"), ...pageQuerySchema.shape }),

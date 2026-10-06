@@ -26,6 +26,7 @@ import {
   ListeningDto,
   ListeningResultDto,
   MeDto,
+  NotificationOpenedDto,
   ProgressPageDto,
   ProgressQueryDto,
   StatsDto,
@@ -91,6 +92,13 @@ export class MeController {
   @ZodResponse({ type: ListeningResultDto, status: 200 })
   listening(@CurrentUser() user: AuthClaims, @Body() body: ListeningDto) {
     return this.me.listen(user.userId, body)
+  }
+
+  /** The app reports a tapped push (its `PushData.ref`): the newest matching send is marked opened. */
+  @Post("notifications/opened")
+  @HttpCode(204)
+  async notificationOpened(@CurrentUser() user: AuthClaims, @Body() body: NotificationOpenedDto) {
+    await this.me.notificationOpened(user.userId, body.ref)
   }
 
   @Get("progress")
