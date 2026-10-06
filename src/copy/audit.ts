@@ -1,0 +1,47 @@
+/** What each recorded action means, for the audit log. */
+export const ACTION_LABELS: Record<string, string> = {
+  "podcast.create": "Created a podcast",
+  "podcast.update": "Edited a podcast",
+  "podcast.delete": "Deleted a podcast",
+  "episode.create": "Created an episode",
+  "episode.update": "Edited an episode",
+  "episode.delete": "Deleted an episode",
+  "episode.publish": "Published an episode",
+  "episode.unpublish": "Unpublished an episode",
+  "level.put": "Saved a level",
+  "level.delete": "Deleted a level",
+  "category.create": "Created a category",
+  "category.update": "Edited a category",
+  "category.delete": "Deleted a category",
+  "list.create": "Created a list",
+  "list.update": "Edited a list",
+  "list.delete": "Deleted a list",
+  "list.episodes": "Reordered a list",
+  "home-config.update": "Changed the home screen",
+  "user.view": "Opened a user",
+  "users.search": "Searched users",
+  "user.update": "Changed a user's Pro access",
+  "media.presign": "Uploaded a file",
+  "transcribe.submit": "Started a transcription",
+  "cover.prompt": "Wrote a cover prompt",
+  "cover.image": "Generated a cover",
+  "role.grant": "Granted admin",
+  "role.revoke": "Revoked admin",
+}
+
+export const KNOWN_ACTIONS = Object.keys(ACTION_LABELS)
+
+export const actionLabel = (action: string) => ACTION_LABELS[action] ?? action
+
+export const AUDIT = {
+  title: "Audit log",
+  subtitle: "Every change an admin made, and every user page or search they opened.",
+  allActions: "All actions",
+  targetPlaceholder: "Filter by record ID",
+  columns: { when: "When", admin: "Admin", action: "Action", target: "Subject", details: "Details" },
+  cli: "CLI",
+  targets: { podcast: "Podcast", episode: "Episode", category: "Category", list: "List", user: "User", transcription: "Transcription" } as Record<string, string>,
+  emptyTitle: "Nothing recorded",
+  emptyBody: "No admin action matches these filters yet.",
+  history: "History",
+}
