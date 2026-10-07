@@ -2,12 +2,15 @@ import {
   AudioLines,
   House,
   LayoutDashboard,
+  ListChecks,
   ListOrdered,
   type LucideIcon,
+  Megaphone,
   Podcast,
   ScrollText,
   Tags,
   Users,
+  Workflow,
 } from "lucide-react"
 import { NAV_COPY } from "@/copy/nav"
 
@@ -41,6 +44,14 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/lists", label: NAV_COPY.lists, icon: ListOrdered },
       { to: "/home", label: NAV_COPY.home, icon: House },
+    ],
+  },
+  {
+    label: NAV_COPY.groups.engagement,
+    items: [
+      { to: "/notifications", label: NAV_COPY.campaigns, icon: Megaphone },
+      { to: "/automations", label: NAV_COPY.automations, icon: Workflow },
+      { to: "/send-log", label: NAV_COPY.sendLog, icon: ListChecks },
     ],
   },
   {

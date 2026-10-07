@@ -36,6 +36,7 @@ export type Level = AdminEpisodeLevel["level"]
 export type EpisodeInput = z.input<typeof gen.adminEpisodesControllerUpdateV1Body>
 export type EpisodeCreateInput = z.input<typeof gen.adminEpisodesControllerCreateV1Body>
 export type LevelInput = z.input<typeof gen.adminEpisodesControllerPutLevelV1Body>
+export type PublishInput = z.input<typeof gen.adminEpisodesControllerPublishV1Body>
 
 // Categories
 export const categoriesSchema = gen.adminCategoriesControllerListV1200Response
@@ -81,3 +82,43 @@ export type MediaFolder = z.input<typeof gen.adminMediaControllerPresignV1Body>[
 export const auditSchema = gen.adminAuditControllerListV1200Response
 export type Audit = z.infer<typeof auditSchema>
 export type AuditEntry = Audit["entries"][number]
+
+// Push notifications: the scheduler's status and the automations
+export const notificationsStatusSchema = gen.adminAutomationsControllerStatusV1200Response
+export const automationsSchema = gen.adminAutomationsControllerAutomationsV1200Response
+export type NotificationsStatus = z.infer<typeof notificationsStatusSchema>
+export type AutomationsView = z.infer<typeof automationsSchema>
+export type AutomationSettings = AutomationsView["settings"]
+export type KindCount = AutomationsView["last7Days"][number]
+export type NotificationKind = KindCount["kind"]
+
+// Push campaigns
+export const campaignPageSchema = gen.adminCampaignsControllerListV1200Response
+export const campaignSchema = gen.adminCampaignsControllerGetV1200Response
+export const campaignStatsSchema = gen.adminCampaignsControllerStatsV1200Response
+export const testResultSchema = gen.adminCampaignsControllerTestV1200Response
+export const translationSchema = gen.adminCampaignsControllerTranslateV1200Response
+export const reachSchema = gen.adminCampaignsControllerReachV1200Response
+export type CampaignPage = z.infer<typeof campaignPageSchema>
+export type AdminCampaign = z.infer<typeof campaignSchema>
+export type CampaignStatus = AdminCampaign["status"]
+export type CampaignSource = AdminCampaign["sourceLanguage"]
+export type CampaignMessage = AdminCampaign["messages"][string]
+export type Audience = AdminCampaign["audience"]
+export type AudienceSegment = Audience["segment"]
+export type Locale = NonNullable<Audience["languages"]>[number]
+export type PushLink = AdminCampaign["link"]
+export type PushLinkType = PushLink["type"]
+export type CampaignDelivery = NonNullable<AdminCampaign["delivery"]>
+export type CampaignInput = z.input<typeof gen.adminCampaignsControllerCreateV1Body>
+export type CampaignPatch = z.input<typeof gen.adminCampaignsControllerUpdateV1Body>
+export type CampaignStats = z.infer<typeof campaignStatsSchema>
+export type TestInput = z.input<typeof gen.adminCampaignsControllerTestV1Body>
+export type TranslateInput = z.input<typeof gen.adminCampaignsControllerTranslateV1Body>
+export type Reach = z.infer<typeof reachSchema>
+
+// The send log
+export const sendLogSchema = gen.adminSendsControllerListV1200Response
+export type SendLog = z.infer<typeof sendLogSchema>
+export type SendRow = SendLog["entries"][number]
+export type SendStatus = SendRow["status"]

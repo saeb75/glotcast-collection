@@ -78,3 +78,81 @@ export const auditRequest = (q: AuditQuery) => ({
   action: unlessAll(q.action),
   targetId: q.target || undefined,
 })
+
+// Push campaigns
+export const CAMPAIGN_STATUSES = [
+  "all",
+  "draft",
+  "scheduled",
+  "sending",
+  "sent",
+  "canceled",
+  "failed",
+] as const
+export type CampaignStatusFilter = (typeof CAMPAIGN_STATUSES)[number]
+
+export interface CampaignsQuery {
+  status: CampaignStatusFilter
+  page: number
+}
+export const parseCampaigns = (params: URLSearchParams): CampaignsQuery => ({
+  status: pickEnum(params.get("status"), CAMPAIGN_STATUSES, "all"),
+  page: readPage(params),
+})
+export const campaignsParams = (q: CampaignsQuery) => writeParams({ ...q }, { status: "all", page: 1 })
+export const campaignsKey = (q: CampaignsQuery) => keyOf(q.status, q.page)
+export const campaignsRequest = (q: CampaignsQuery) => ({
+  status: unlessAll(q.status),
+  page: q.page,
+  pageSize: PAGE_SIZE,
+})
+
+// The send log
+export const SEND_KINDS = [
+  "all",
+  "reminder",
+  "streak_saver",
+  "learning",
+  "new_episodes",
+  "campaign",
+  "test",
+] as const
+export type SendKindFilter = (typeof SEND_KINDS)[number]
+export const SEND_STATUSES = [
+  "all",
+  "queued",
+  "sending",
+  "sent",
+  "failed",
+  "unreachable",
+  "expired",
+  "canceled",
+  "skipped",
+] as const
+export type SendStatusFilter = (typeof SEND_STATUSES)[number]
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export interface SendLogQuery {
+  kind: SendKindFilter
+  status: SendStatusFilter
+  campaign: string // a campaign id or "all"
+  user: string // a user id, or ""
+}
+const SEND_LOG_DEFAULTS = { kind: "all", status: "all", campaign: "all", user: "" } as const
+
+export const parseSendLog = (params: URLSearchParams): SendLogQuery => ({
+  kind: pickEnum(params.get("kind"), SEND_KINDS, "all"),
+  status: pickEnum(params.get("status"), SEND_STATUSES, "all"),
+  campaign: text(params, "campaign") || "all",
+  user: text(params, "user"),
+})
+export const sendLogParams = (q: SendLogQuery) => writeParams({ ...q }, SEND_LOG_DEFAULTS)
+export const sendLogKey = (q: SendLogQuery) => keyOf(q.kind, q.status, q.campaign, q.user)
+/** Ids that aren't uuids are left out (the API would refuse the whole request). */
+export const sendLogRequest = (q: SendLogQuery) => ({
+  kind: unlessAll(q.kind),
+  status: unlessAll(q.status),
+  campaignId: UUID_RE.test(q.campaign) ? q.campaign : undefined,
+  userId: UUID_RE.test(q.user) ? q.user.toLowerCase() : undefined,
+})

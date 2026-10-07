@@ -30,6 +30,14 @@ export const formatShortDay = (value: string) => shortDay.format(new Date(value)
 /** "Tue" — a week's chart. */
 export const formatWeekday = (value: string) => weekday.format(new Date(value))
 
+const lockScreenDay = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" })
+/** "Wednesday, October 7" — a lock screen's date line. */
+export const formatLockScreenDay = (date: Date) => lockScreenDay.format(date)
+
+/** A rate with one decimal: "4.2%"; a dash without a total. */
+export const formatRate = (part: number, total: number) =>
+  total > 0 ? `${(Math.round((part / total) * 1000) / 10).toLocaleString("en-US")}%` : "—"
+
 const relative = new Intl.RelativeTimeFormat("en-US", { numeric: "auto" })
 const STEPS: [Intl.RelativeTimeFormatUnit, number][] = [
   ["second", 60],

@@ -1,4 +1,4 @@
-import { listEpisodes } from "@/api/episodes"
+import { findEpisodes } from "@/api/episodes"
 import { getHomeConfig, putHomeConfig } from "@/api/homeConfig"
 import { HOME } from "@/copy/home"
 import { withData } from "@/domain/cache"
@@ -12,18 +12,6 @@ const store = useHomeConfigStore.getState
 const MAX_AGE = 30_000
 
 export type HomeSection = keyof HomeConfig
-
-/** The config only holds ids: find the slider's episodes in the (newest first) episode list. */
-async function findEpisodes(ids: string[]): Promise<AdminEpisode[]> {
-  const missing = new Set(ids)
-  const found: AdminEpisode[] = []
-  for (let page = 1; missing.size > 0 && page <= 30; page++) {
-    const result = await listEpisodes({ page, pageSize: 50 })
-    for (const e of result.items) if (missing.delete(e.id)) found.push(e)
-    if (!result.hasMore) break
-  }
-  return found
-}
 
 export const isHomeDirty = (draft: HomeConfig | undefined, saved: HomeConfig | undefined) =>
   Boolean(

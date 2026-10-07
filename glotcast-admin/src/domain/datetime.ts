@@ -16,3 +16,6 @@ export function fromLocalInput(value: string): string | null {
   const d = new Date(value)
   return Number.isNaN(d.getTime()) ? null : d.toISOString()
 }
+
+/** The viewer's IANA time zone ("Europe/Istanbul"). */
+export const viewerTimeZone = (): string => Intl.DateTimeFormat().resolvedOptions().timeZone

@@ -14,6 +14,7 @@ const TARGET_PATHS: Record<string, (id: string) => string> = {
   list: (id) => `/lists/${id}`,
   user: (id) => `/users/${id}`,
   category: () => "/categories",
+  campaign: (id) => `/notifications/${id}`,
 }
 
 const show = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value))

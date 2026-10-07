@@ -6,6 +6,9 @@ import { AuthError, SupabaseService } from "@/services/SupabaseService"
 import { useAuthStore } from "@/stores/useAuthStore"
 import { useLoginStore } from "@/stores/useLoginStore"
 import { AuditController } from "./AuditController"
+import { AutomationsController } from "./AutomationsController"
+import { CampaignEditorController } from "./CampaignEditorController"
+import { CampaignsController } from "./CampaignsController"
 import { CategoriesController } from "./CategoriesController"
 import { CoverController } from "./CoverController"
 import { DashboardController } from "./DashboardController"
@@ -15,6 +18,7 @@ import { LevelEditorController } from "./LevelEditorController"
 import { ListsController } from "./ListsController"
 import { PickerController } from "./PickerController"
 import { PodcastsController } from "./PodcastsController"
+import { SendLogController } from "./SendLogController"
 import { UsersController } from "./UsersController"
 
 const store = useAuthStore.getState
@@ -138,6 +142,10 @@ export class AuthController {
       UsersController,
       AuditController,
       PickerController,
+      CampaignsController,
+      CampaignEditorController,
+      AutomationsController,
+      SendLogController,
     ])
       controller.reset()
   }

@@ -17,20 +17,26 @@ import { EpisodesController } from "@/controllers/EpisodesController"
 import { COMMON } from "@/copy/common"
 import { EPISODES } from "@/copy/episodes"
 import { fromLocalInput, toLocalInput } from "@/domain/datetime"
+import { NotifyFollowersField } from "./NotifyFollowersField"
 
-/** Picks the moment the episode goes live (PATCH publishedAt). */
+/** Picks the moment the episode goes live and whether its followers get a push then (PATCH). */
 export function ScheduleDialog({
   episodeId,
   current,
+  notifyFollowers,
+  notifiedAt,
   open,
   onOpenChange,
 }: {
   episodeId: string
   current: string | null
+  notifyFollowers: boolean
+  notifiedAt: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
   const [value, setValue] = useState(() => toLocalInput(current))
+  const [notify, setNotify] = useState(notifyFollowers)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const e = EPISODES.editor
@@ -40,7 +46,7 @@ export function ScheduleDialog({
     const iso = fromLocalInput(value)
     if (!iso || new Date(iso).getTime() <= Date.now()) return setError(e.schedulePast)
     setBusy(true)
-    const saved = await EpisodesController.schedule(episodeId, iso)
+    const saved = await EpisodesController.schedule(episodeId, iso, notify)
     setBusy(false)
     if (saved) onOpenChange(false)
   }
@@ -67,6 +73,13 @@ export function ScheduleDialog({
             />
             {error ? <FieldError>{error}</FieldError> : null}
           </Field>
+          <NotifyFollowersField
+            id="schedule-notify"
+            checked={notify}
+            onChange={setNotify}
+            notifiedAt={notifiedAt}
+            disabled={busy}
+          />
           <DialogFooter>
             <Button type="button" variant="outline" disabled={busy} onClick={() => onOpenChange(false)}>
               {COMMON.cancel}

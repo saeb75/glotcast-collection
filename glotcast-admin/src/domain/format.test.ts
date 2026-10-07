@@ -4,6 +4,8 @@ import {
   formatBytes,
   formatClock,
   formatListening,
+  formatLockScreenDay,
+  formatRate,
   formatRelative,
   formatTimestamp,
   initials,
@@ -28,6 +30,13 @@ describe("formats", () => {
     const now = Date.parse("2026-10-06T12:00:00Z")
     expect(formatRelative("2026-10-06T11:55:00Z", now)).toBe("5 minutes ago")
     expect(formatRelative(null, now)).toBe("Never")
+  })
+
+  it("formats rates and a lock screen's day", () => {
+    expect(formatRate(1, 3)).toBe("33.3%")
+    expect(formatRate(5, 5)).toBe("100%")
+    expect(formatRate(1, 0)).toBe("—")
+    expect(formatLockScreenDay(new Date(2026, 9, 7))).toBe("Wednesday, October 7")
   })
 
   it("labels episodes and people", () => {

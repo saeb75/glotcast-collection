@@ -27,12 +27,27 @@ export type ErrorCode =
 export class ApiError extends Error {
   readonly code: ErrorCode
   readonly status?: number
+  /** A validation 400: the API's message per failed field ("streakSaver.time" → "must be outside …"). */
+  readonly fields: Record<string, string>
 
-  constructor(code: ErrorCode, message: string, status?: number) {
+  constructor(code: ErrorCode, message: string, status?: number, fields: Record<string, string> = {}) {
     super(message)
     this.code = code
     this.status = status
+    this.fields = fields
   }
+}
+
+/** The `errors` of a validation problem (zod issues: `path` and `message`) by dotted path, first one each. */
+function issueFields(errors: unknown): Record<string, string> {
+  const out: Record<string, string> = {}
+  if (!Array.isArray(errors)) return out
+  for (const issue of errors as { path?: unknown; message?: unknown }[]) {
+    if (!issue || !Array.isArray(issue.path) || typeof issue.message !== "string") continue
+    const key = issue.path.map(String).join(".")
+    if (key && !(key in out)) out[key] = issue.message
+  }
+  return out
 }
 
 const BY_STATUS: Record<number, ErrorCode> = {
@@ -58,7 +73,12 @@ export function errorCode(error: unknown): ApiError {
     if (!response) return new ApiError("offline", error.message)
     const problem = (typeof response.data === "object" && response.data ? response.data : {}) as Problem
     const code = BY_STATUS[response.status] ?? (response.status >= 500 ? "server" : "unknown")
-    return new ApiError(code, problem.detail ?? problem.title ?? `HTTP ${response.status}`, response.status)
+    return new ApiError(
+      code,
+      problem.detail ?? problem.title ?? `HTTP ${response.status}`,
+      response.status,
+      issueFields(problem.errors),
+    )
   }
   return new ApiError("unknown", error instanceof Error ? error.message : String(error))
 }

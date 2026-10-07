@@ -1,6 +1,6 @@
 "use client"
 
-import { Trash2 } from "lucide-react"
+import { Bell, BellOff, BellRing, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { EpisodesController } from "@/controllers/EpisodesController"
 import { EPISODES } from "@/copy/episodes"
 import { formatDateTime } from "@/domain/format"
+import { cn } from "@/lib/utils"
 import { type AdminEpisodeDetail } from "@/schemas/admin"
 import { ConfirmDialog } from "@/shared/ConfirmDialog"
 import { CopyButton } from "@/shared/CopyButton"
@@ -38,6 +39,29 @@ export function EpisodeFacts({ episode: ep }: { episode: AdminEpisodeDetail }) {
           {ep.publishedAt ? (
             <DetailItem label={f.publishedAt}>{formatDateTime(ep.publishedAt)}</DetailItem>
           ) : null}
+          <DetailItem label={f.followers}>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5",
+                !ep.followersNotifiedAt && !ep.notifyFollowers && "text-muted-foreground",
+              )}
+            >
+              {ep.followersNotifiedAt ? (
+                <BellRing className="size-3.5 text-positive" />
+              ) : ep.notifyFollowers ? (
+                <Bell className="size-3.5 text-muted-foreground" />
+              ) : (
+                <BellOff className="size-3.5" />
+              )}
+              {ep.followersNotifiedAt
+                ? f.followersNotified(formatDateTime(ep.followersNotifiedAt))
+                : !ep.notifyFollowers
+                  ? f.followersOff
+                  : ep.status === "published"
+                    ? f.followersNext
+                    : f.followersLater}
+            </span>
+          </DetailItem>
           <DetailItem label={EPISODES.columns.levels}>
             <span className="inline-flex justify-end">
               <LevelBadges levels={ep.levels} />

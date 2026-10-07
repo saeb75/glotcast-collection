@@ -519,6 +519,8 @@ export const adminEpisodesControllerListV1200ResponseItemsItemLevelsItemDescript
 export const adminEpisodesControllerListV1200ResponseItemsItemLevelsItemChunkCountMin = -9007199254740991
 export const adminEpisodesControllerListV1200ResponseItemsItemLevelsItemChunkCountMax = 9007199254740991
 
+export const adminEpisodesControllerListV1200ResponseItemsItemFollowersNotifiedAtMinOne = 0
+
 export const adminEpisodesControllerListV1200ResponsePageMin = -9007199254740991
 export const adminEpisodesControllerListV1200ResponsePageMax = 9007199254740991
 
@@ -587,6 +589,13 @@ export const adminEpisodesControllerListV1200Response = zod.object({
       ),
       createdAt: zod.string().describe("ISO timestamp"),
       updatedAt: zod.string().describe("ISO timestamp"),
+      notifyFollowers: zod.boolean().describe("push the podcast's followers when it goes live"),
+      followersNotifiedAt: zod
+        .union([
+          zod.string().min(adminEpisodesControllerListV1200ResponseItemsItemFollowersNotifiedAtMinOne),
+          zod.null(),
+        ])
+        .describe("when it went live for the followers' push (once)"),
     }),
   ),
   page: zod
@@ -648,6 +657,7 @@ export const adminEpisodesControllerCreateV1Body = zod.object({
     .union([zod.iso.datetime({}).regex(adminEpisodesControllerCreateV1BodyPublishedAtRegExpOne), zod.null()])
     .optional()
     .describe("schedule (future) or backdate; null = draft. POST …\/publish publishes now"),
+  notifyFollowers: zod.boolean().optional().describe("default true: push followers when it goes live"),
 })
 
 export const adminEpisodesControllerCreateV1201ResponseIdRegExp = new RegExp(
@@ -675,6 +685,8 @@ export const adminEpisodesControllerCreateV1201ResponseLevelsItemChunkCountMin =
 export const adminEpisodesControllerCreateV1201ResponseLevelsItemChunkCountMax = 9007199254740991
 
 export const adminEpisodesControllerCreateV1201ResponseLevelsItemTranscriptChunksItemSpeakerMinOne = 0
+
+export const adminEpisodesControllerCreateV1201ResponseFollowersNotifiedAtMinOne = 0
 
 export const adminEpisodesControllerCreateV1201Response = zod.object({
   id: zod.uuid().regex(adminEpisodesControllerCreateV1201ResponseIdRegExp),
@@ -757,6 +769,13 @@ export const adminEpisodesControllerCreateV1201Response = zod.object({
   ),
   createdAt: zod.string().describe("ISO timestamp"),
   updatedAt: zod.string().describe("ISO timestamp"),
+  notifyFollowers: zod.boolean().describe("push the podcast's followers when it goes live"),
+  followersNotifiedAt: zod
+    .union([
+      zod.string().min(adminEpisodesControllerCreateV1201ResponseFollowersNotifiedAtMinOne),
+      zod.null(),
+    ])
+    .describe("when it went live for the followers' push (once)"),
 })
 
 export const adminEpisodesControllerGetV1200ResponseIdRegExp = new RegExp(
@@ -784,6 +803,8 @@ export const adminEpisodesControllerGetV1200ResponseLevelsItemChunkCountMin = -9
 export const adminEpisodesControllerGetV1200ResponseLevelsItemChunkCountMax = 9007199254740991
 
 export const adminEpisodesControllerGetV1200ResponseLevelsItemTranscriptChunksItemSpeakerMinOne = 0
+
+export const adminEpisodesControllerGetV1200ResponseFollowersNotifiedAtMinOne = 0
 
 export const adminEpisodesControllerGetV1200Response = zod.object({
   id: zod.uuid().regex(adminEpisodesControllerGetV1200ResponseIdRegExp),
@@ -863,6 +884,10 @@ export const adminEpisodesControllerGetV1200Response = zod.object({
   ),
   createdAt: zod.string().describe("ISO timestamp"),
   updatedAt: zod.string().describe("ISO timestamp"),
+  notifyFollowers: zod.boolean().describe("push the podcast's followers when it goes live"),
+  followersNotifiedAt: zod
+    .union([zod.string().min(adminEpisodesControllerGetV1200ResponseFollowersNotifiedAtMinOne), zod.null()])
+    .describe("when it went live for the followers' push (once)"),
 })
 
 export const adminEpisodesControllerUpdateV1BodyPodcastIdRegExp = new RegExp(
@@ -909,6 +934,7 @@ export const adminEpisodesControllerUpdateV1Body = zod.object({
     .union([zod.iso.datetime({}).regex(adminEpisodesControllerUpdateV1BodyPublishedAtRegExpOne), zod.null()])
     .optional()
     .describe("schedule (future) or backdate; null = draft. POST …\/publish publishes now"),
+  notifyFollowers: zod.boolean().optional().describe("default true: push followers when it goes live"),
 })
 
 export const adminEpisodesControllerUpdateV1200ResponseIdRegExp = new RegExp(
@@ -936,6 +962,8 @@ export const adminEpisodesControllerUpdateV1200ResponseLevelsItemChunkCountMin =
 export const adminEpisodesControllerUpdateV1200ResponseLevelsItemChunkCountMax = 9007199254740991
 
 export const adminEpisodesControllerUpdateV1200ResponseLevelsItemTranscriptChunksItemSpeakerMinOne = 0
+
+export const adminEpisodesControllerUpdateV1200ResponseFollowersNotifiedAtMinOne = 0
 
 export const adminEpisodesControllerUpdateV1200Response = zod.object({
   id: zod.uuid().regex(adminEpisodesControllerUpdateV1200ResponseIdRegExp),
@@ -1018,6 +1046,22 @@ export const adminEpisodesControllerUpdateV1200Response = zod.object({
   ),
   createdAt: zod.string().describe("ISO timestamp"),
   updatedAt: zod.string().describe("ISO timestamp"),
+  notifyFollowers: zod.boolean().describe("push the podcast's followers when it goes live"),
+  followersNotifiedAt: zod
+    .union([
+      zod.string().min(adminEpisodesControllerUpdateV1200ResponseFollowersNotifiedAtMinOne),
+      zod.null(),
+    ])
+    .describe("when it went live for the followers' push (once)"),
+})
+
+export const adminEpisodesControllerPublishV1BodyDefault = {}
+
+export const adminEpisodesControllerPublishV1Body = zod.object({
+  notifyFollowers: zod
+    .boolean()
+    .optional()
+    .describe("push the followers when it goes live (kept when absent)"),
 })
 
 export const adminEpisodesControllerPublishV1200ResponseIdRegExp = new RegExp(
@@ -1043,6 +1087,8 @@ export const adminEpisodesControllerPublishV1200ResponseLevelsItemDescriptionMin
 
 export const adminEpisodesControllerPublishV1200ResponseLevelsItemChunkCountMin = -9007199254740991
 export const adminEpisodesControllerPublishV1200ResponseLevelsItemChunkCountMax = 9007199254740991
+
+export const adminEpisodesControllerPublishV1200ResponseFollowersNotifiedAtMinOne = 0
 
 export const adminEpisodesControllerPublishV1200Response = zod.object({
   id: zod.uuid().regex(adminEpisodesControllerPublishV1200ResponseIdRegExp),
@@ -1098,6 +1144,13 @@ export const adminEpisodesControllerPublishV1200Response = zod.object({
   ),
   createdAt: zod.string().describe("ISO timestamp"),
   updatedAt: zod.string().describe("ISO timestamp"),
+  notifyFollowers: zod.boolean().describe("push the podcast's followers when it goes live"),
+  followersNotifiedAt: zod
+    .union([
+      zod.string().min(adminEpisodesControllerPublishV1200ResponseFollowersNotifiedAtMinOne),
+      zod.null(),
+    ])
+    .describe("when it went live for the followers' push (once)"),
 })
 
 export const adminEpisodesControllerUnpublishV1200ResponseIdRegExp = new RegExp(
@@ -1123,6 +1176,8 @@ export const adminEpisodesControllerUnpublishV1200ResponseLevelsItemDescriptionM
 
 export const adminEpisodesControllerUnpublishV1200ResponseLevelsItemChunkCountMin = -9007199254740991
 export const adminEpisodesControllerUnpublishV1200ResponseLevelsItemChunkCountMax = 9007199254740991
+
+export const adminEpisodesControllerUnpublishV1200ResponseFollowersNotifiedAtMinOne = 0
 
 export const adminEpisodesControllerUnpublishV1200Response = zod.object({
   id: zod.uuid().regex(adminEpisodesControllerUnpublishV1200ResponseIdRegExp),
@@ -1178,6 +1233,13 @@ export const adminEpisodesControllerUnpublishV1200Response = zod.object({
   ),
   createdAt: zod.string().describe("ISO timestamp"),
   updatedAt: zod.string().describe("ISO timestamp"),
+  notifyFollowers: zod.boolean().describe("push the podcast's followers when it goes live"),
+  followersNotifiedAt: zod
+    .union([
+      zod.string().min(adminEpisodesControllerUnpublishV1200ResponseFollowersNotifiedAtMinOne),
+      zod.null(),
+    ])
+    .describe("when it went live for the followers' push (once)"),
 })
 
 export const adminEpisodesControllerPutLevelV1BodyAudioUrlMax = 2000
@@ -1254,6 +1316,8 @@ export const adminEpisodesControllerPutLevelV1200ResponseLevelsItemChunkCountMin
 export const adminEpisodesControllerPutLevelV1200ResponseLevelsItemChunkCountMax = 9007199254740991
 
 export const adminEpisodesControllerPutLevelV1200ResponseLevelsItemTranscriptChunksItemSpeakerMinOne = 0
+
+export const adminEpisodesControllerPutLevelV1200ResponseFollowersNotifiedAtMinOne = 0
 
 export const adminEpisodesControllerPutLevelV1200Response = zod.object({
   id: zod.uuid().regex(adminEpisodesControllerPutLevelV1200ResponseIdRegExp),
@@ -1338,6 +1402,13 @@ export const adminEpisodesControllerPutLevelV1200Response = zod.object({
   ),
   createdAt: zod.string().describe("ISO timestamp"),
   updatedAt: zod.string().describe("ISO timestamp"),
+  notifyFollowers: zod.boolean().describe("push the podcast's followers when it goes live"),
+  followersNotifiedAt: zod
+    .union([
+      zod.string().min(adminEpisodesControllerPutLevelV1200ResponseFollowersNotifiedAtMinOne),
+      zod.null(),
+    ])
+    .describe("when it went live for the followers' push (once)"),
 })
 
 export const adminCategoriesControllerListV1200ResponseIdRegExp = new RegExp(
@@ -2074,6 +2145,8 @@ export const adminUsersControllerGetV1200ResponseUserDailyGoalMinMax = 900719925
 
 export const adminUsersControllerGetV1200ResponseUserReminderTimeMinOne = 0
 
+export const adminUsersControllerGetV1200ResponseUserTimezoneMinOne = 0
+
 export const adminUsersControllerGetV1200ResponseUserLegacyStrapiUserIdMinOne = -9007199254740991
 export const adminUsersControllerGetV1200ResponseUserLegacyStrapiUserIdMaxOne = 9007199254740991
 
@@ -2127,6 +2200,17 @@ export const adminUsersControllerGetV1200Response = zod.object({
       .union([zod.string().min(adminUsersControllerGetV1200ResponseUserReminderTimeMinOne), zod.null()])
       .describe('\"HH:mm\", local time'),
     featureAccess: zod.boolean().describe("backend-granted Pro"),
+    timezone: zod
+      .union([zod.string().min(adminUsersControllerGetV1200ResponseUserTimezoneMinOne), zod.null()])
+      .describe('IANA zone reported by the device, e.g. \"Europe\/Istanbul\"'),
+    pushEnabled: zod.boolean().describe("the device is opted in to push (OneSignal)"),
+    notifyReminders: zod.boolean().describe("daily reminder + streak saver"),
+    notifyLearning: zod.boolean().describe("words due, finish an episode, weekly recap"),
+    notifyNewEpisodes: zod.boolean().describe("new episodes of followed podcasts"),
+    notifyNews: zod.boolean().describe("admin campaigns: news & offers"),
+    proActive: zod
+      .boolean()
+      .describe("the app sees an active subscription; targeting only, never grants access"),
     createdAt: zod.string(),
     lastSeenAt: zod.string().describe("ISO timestamp"),
     legacyStrapiUserId: zod.union([
@@ -2201,6 +2285,8 @@ export const adminUsersControllerUpdateV1200ResponseUserDailyGoalMinMax = 900719
 
 export const adminUsersControllerUpdateV1200ResponseUserReminderTimeMinOne = 0
 
+export const adminUsersControllerUpdateV1200ResponseUserTimezoneMinOne = 0
+
 export const adminUsersControllerUpdateV1200ResponseUserLegacyStrapiUserIdMinOne = -9007199254740991
 export const adminUsersControllerUpdateV1200ResponseUserLegacyStrapiUserIdMaxOne = 9007199254740991
 
@@ -2254,6 +2340,17 @@ export const adminUsersControllerUpdateV1200Response = zod.object({
       .union([zod.string().min(adminUsersControllerUpdateV1200ResponseUserReminderTimeMinOne), zod.null()])
       .describe('\"HH:mm\", local time'),
     featureAccess: zod.boolean().describe("backend-granted Pro"),
+    timezone: zod
+      .union([zod.string().min(adminUsersControllerUpdateV1200ResponseUserTimezoneMinOne), zod.null()])
+      .describe('IANA zone reported by the device, e.g. \"Europe\/Istanbul\"'),
+    pushEnabled: zod.boolean().describe("the device is opted in to push (OneSignal)"),
+    notifyReminders: zod.boolean().describe("daily reminder + streak saver"),
+    notifyLearning: zod.boolean().describe("words due, finish an episode, weekly recap"),
+    notifyNewEpisodes: zod.boolean().describe("new episodes of followed podcasts"),
+    notifyNews: zod.boolean().describe("admin campaigns: news & offers"),
+    proActive: zod
+      .boolean()
+      .describe("the app sees an active subscription; targeting only, never grants access"),
     createdAt: zod.string(),
     lastSeenAt: zod.string().describe("ISO timestamp"),
     legacyStrapiUserId: zod.union([
@@ -2519,6 +2616,1999 @@ export const adminAuditControllerListV1200Response = zod.object({
     .number()
     .min(adminAuditControllerListV1200ResponseNextBeforeMin)
     .max(adminAuditControllerListV1200ResponseNextBeforeMax)
+    .optional()
+    .describe("pass as ?before= for older entries; absent at the end"),
+})
+
+export const adminCampaignsControllerListV1200ResponseItemsItemIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerListV1200ResponseItemsItemMessagesTitleMax = 60
+
+export const adminCampaignsControllerListV1200ResponseItemsItemMessagesBodyMax = 180
+
+export const adminCampaignsControllerListV1200ResponseItemsItemAudienceLevelsMax = 3
+
+export const adminCampaignsControllerListV1200ResponseItemsItemAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerListV1200ResponseItemsItemAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerListV1200ResponseItemsItemAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerListV1200ResponseItemsItemAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerListV1200ResponseItemsItemAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerListV1200ResponseItemsItemLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerListV1200ResponseItemsItemImageUrlMinOne = 0
+
+export const adminCampaignsControllerListV1200ResponseItemsItemDeliverySendAtRegExp = new RegExp(
+  "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+)
+export const adminCampaignsControllerListV1200ResponseItemsItemDeliveryTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminCampaignsControllerListV1200ResponseItemsItemRecipientsMinOne = -9007199254740991
+export const adminCampaignsControllerListV1200ResponseItemsItemRecipientsMaxOne = 9007199254740991
+
+export const adminCampaignsControllerListV1200ResponseItemsItemSentAtMinOne = 0
+
+export const adminCampaignsControllerListV1200ResponseItemsItemCreatedByIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerListV1200ResponseItemsItemCreatedByEmailMinOne = 0
+
+export const adminCampaignsControllerListV1200ResponsePageMin = -9007199254740991
+export const adminCampaignsControllerListV1200ResponsePageMax = 9007199254740991
+
+export const adminCampaignsControllerListV1200ResponsePageSizeMin = -9007199254740991
+export const adminCampaignsControllerListV1200ResponsePageSizeMax = 9007199254740991
+
+export const adminCampaignsControllerListV1200ResponseTotalMin = -9007199254740991
+export const adminCampaignsControllerListV1200ResponseTotalMax = 9007199254740991
+
+export const adminCampaignsControllerListV1200Response = zod.object({
+  items: zod.array(
+    zod.object({
+      id: zod.uuid().regex(adminCampaignsControllerListV1200ResponseItemsItemIdRegExp),
+      name: zod.string(),
+      status: zod.enum(["draft", "scheduled", "sending", "sent", "canceled", "failed"]),
+      sourceLanguage: zod.enum(["en", "tr"]),
+      messages: zod
+        .record(
+          zod.string(),
+          zod.object({
+            title: zod
+              .string()
+              .min(1)
+              .max(adminCampaignsControllerListV1200ResponseItemsItemMessagesTitleMax),
+            body: zod.string().min(1).max(adminCampaignsControllerListV1200ResponseItemsItemMessagesBodyMax),
+          }),
+        )
+        .describe("by app language; a user's language falls back to en, then the source"),
+      audience: zod.object({
+        segment: zod
+          .enum(["all", "pro", "free", "guests", "signedIn"])
+          .describe("pro = featureAccess or proActive"),
+        levels: zod
+          .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+          .max(adminCampaignsControllerListV1200ResponseItemsItemAudienceLevelsMax)
+          .optional(),
+        languages: zod
+          .array(
+            zod.enum([
+              "ar",
+              "de",
+              "en",
+              "es",
+              "fr",
+              "hi",
+              "id",
+              "it",
+              "ja",
+              "ko",
+              "pl",
+              "pt",
+              "ru",
+              "tr",
+              "vi",
+              "zh",
+            ]),
+          )
+          .max(adminCampaignsControllerListV1200ResponseItemsItemAudienceLanguagesMax)
+          .optional()
+          .describe("the app language"),
+        inactiveDays: zod
+          .number()
+          .min(1)
+          .max(adminCampaignsControllerListV1200ResponseItemsItemAudienceInactiveDaysMax)
+          .optional()
+          .describe("not seen for at least N days"),
+        activeWithinDays: zod
+          .number()
+          .min(1)
+          .max(adminCampaignsControllerListV1200ResponseItemsItemAudienceActiveWithinDaysMax)
+          .optional()
+          .describe("seen within the last N days"),
+        podcastIds: zod
+          .array(
+            zod.uuid().regex(adminCampaignsControllerListV1200ResponseItemsItemAudiencePodcastIdsItemRegExp),
+          )
+          .max(adminCampaignsControllerListV1200ResponseItemsItemAudiencePodcastIdsMax)
+          .optional()
+          .describe("followers of any of these podcasts"),
+      }),
+      link: zod.object({
+        type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+        id: zod
+          .uuid()
+          .regex(adminCampaignsControllerListV1200ResponseItemsItemLinkIdRegExp)
+          .optional()
+          .describe("episode (episode, player) or podcast id"),
+        level: zod
+          .enum(["bg", "in", "ad"])
+          .optional()
+          .describe("bg = beginner, in = intermediate, ad = advanced"),
+      }),
+      imageUrl: zod.union([
+        zod.string().min(adminCampaignsControllerListV1200ResponseItemsItemImageUrlMinOne),
+        zod.null(),
+      ]),
+      respectQuietHours: zod.boolean(),
+      delivery: zod.union([
+        zod.union([
+          zod.object({
+            mode: zod.literal("now"),
+          }),
+          zod.object({
+            mode: zod.literal("at"),
+            sendAt: zod.iso
+              .datetime({})
+              .regex(adminCampaignsControllerListV1200ResponseItemsItemDeliverySendAtRegExp),
+          }),
+          zod.object({
+            mode: zod.literal("local"),
+            date: zod.string(),
+            time: zod
+              .string()
+              .regex(adminCampaignsControllerListV1200ResponseItemsItemDeliveryTimeRegExp)
+              .describe("each user's local time"),
+          }),
+        ]),
+        zod.null(),
+      ]),
+      recipients: zod
+        .union([
+          zod
+            .number()
+            .min(adminCampaignsControllerListV1200ResponseItemsItemRecipientsMinOne)
+            .max(adminCampaignsControllerListV1200ResponseItemsItemRecipientsMaxOne),
+          zod.null(),
+        ])
+        .describe("users it was queued for (set when sending starts)"),
+      sentAt: zod
+        .union([zod.string().min(adminCampaignsControllerListV1200ResponseItemsItemSentAtMinOne), zod.null()])
+        .describe("ISO timestamp"),
+      createdBy: zod.union([
+        zod.object({
+          id: zod.uuid().regex(adminCampaignsControllerListV1200ResponseItemsItemCreatedByIdRegExp),
+          email: zod.union([
+            zod.string().min(adminCampaignsControllerListV1200ResponseItemsItemCreatedByEmailMinOne),
+            zod.null(),
+          ]),
+        }),
+        zod.null(),
+      ]),
+      createdAt: zod.string().describe("ISO timestamp"),
+      updatedAt: zod.string().describe("ISO timestamp"),
+    }),
+  ),
+  page: zod
+    .number()
+    .min(adminCampaignsControllerListV1200ResponsePageMin)
+    .max(adminCampaignsControllerListV1200ResponsePageMax),
+  pageSize: zod
+    .number()
+    .min(adminCampaignsControllerListV1200ResponsePageSizeMin)
+    .max(adminCampaignsControllerListV1200ResponsePageSizeMax),
+  total: zod
+    .number()
+    .min(adminCampaignsControllerListV1200ResponseTotalMin)
+    .max(adminCampaignsControllerListV1200ResponseTotalMax),
+  hasMore: zod.boolean(),
+})
+
+export const adminCampaignsControllerCreateV1BodyNameMax = 120
+
+export const adminCampaignsControllerCreateV1BodyMessagesTitleMax = 60
+
+export const adminCampaignsControllerCreateV1BodyMessagesBodyMax = 180
+
+export const adminCampaignsControllerCreateV1BodyAudienceLevelsMax = 3
+
+export const adminCampaignsControllerCreateV1BodyAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerCreateV1BodyAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerCreateV1BodyAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerCreateV1BodyAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCreateV1BodyAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerCreateV1BodyLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCreateV1BodyImageUrlMaxOne = 2000
+
+export const adminCampaignsControllerCreateV1Body = zod.object({
+  name: zod.string().min(1).max(adminCampaignsControllerCreateV1BodyNameMax),
+  sourceLanguage: zod.enum(["en", "tr"]),
+  messages: zod
+    .record(
+      zod.string(),
+      zod.object({
+        title: zod.string().min(1).max(adminCampaignsControllerCreateV1BodyMessagesTitleMax),
+        body: zod.string().min(1).max(adminCampaignsControllerCreateV1BodyMessagesBodyMax),
+      }),
+    )
+    .describe("by app language; a user's language falls back to en, then the source"),
+  audience: zod.object({
+    segment: zod
+      .enum(["all", "pro", "free", "guests", "signedIn"])
+      .describe("pro = featureAccess or proActive"),
+    levels: zod
+      .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+      .max(adminCampaignsControllerCreateV1BodyAudienceLevelsMax)
+      .optional(),
+    languages: zod
+      .array(
+        zod.enum([
+          "ar",
+          "de",
+          "en",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "it",
+          "ja",
+          "ko",
+          "pl",
+          "pt",
+          "ru",
+          "tr",
+          "vi",
+          "zh",
+        ]),
+      )
+      .max(adminCampaignsControllerCreateV1BodyAudienceLanguagesMax)
+      .optional()
+      .describe("the app language"),
+    inactiveDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerCreateV1BodyAudienceInactiveDaysMax)
+      .optional()
+      .describe("not seen for at least N days"),
+    activeWithinDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerCreateV1BodyAudienceActiveWithinDaysMax)
+      .optional()
+      .describe("seen within the last N days"),
+    podcastIds: zod
+      .array(zod.uuid().regex(adminCampaignsControllerCreateV1BodyAudiencePodcastIdsItemRegExp))
+      .max(adminCampaignsControllerCreateV1BodyAudiencePodcastIdsMax)
+      .optional()
+      .describe("followers of any of these podcasts"),
+  }),
+  link: zod.object({
+    type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+    id: zod
+      .uuid()
+      .regex(adminCampaignsControllerCreateV1BodyLinkIdRegExp)
+      .optional()
+      .describe("episode (episode, player) or podcast id"),
+    level: zod
+      .enum(["bg", "in", "ad"])
+      .optional()
+      .describe("bg = beginner, in = intermediate, ad = advanced"),
+  }),
+  imageUrl: zod
+    .union([zod.url().max(adminCampaignsControllerCreateV1BodyImageUrlMaxOne), zod.null()])
+    .optional(),
+  respectQuietHours: zod.boolean().optional().describe("default true"),
+})
+
+export const adminCampaignsControllerCreateV1201ResponseIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCreateV1201ResponseMessagesTitleMax = 60
+
+export const adminCampaignsControllerCreateV1201ResponseMessagesBodyMax = 180
+
+export const adminCampaignsControllerCreateV1201ResponseAudienceLevelsMax = 3
+
+export const adminCampaignsControllerCreateV1201ResponseAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerCreateV1201ResponseAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerCreateV1201ResponseAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerCreateV1201ResponseAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCreateV1201ResponseAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerCreateV1201ResponseLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCreateV1201ResponseImageUrlMinOne = 0
+
+export const adminCampaignsControllerCreateV1201ResponseDeliverySendAtRegExp = new RegExp(
+  "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+)
+export const adminCampaignsControllerCreateV1201ResponseDeliveryTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminCampaignsControllerCreateV1201ResponseRecipientsMinOne = -9007199254740991
+export const adminCampaignsControllerCreateV1201ResponseRecipientsMaxOne = 9007199254740991
+
+export const adminCampaignsControllerCreateV1201ResponseSentAtMinOne = 0
+
+export const adminCampaignsControllerCreateV1201ResponseCreatedByIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCreateV1201ResponseCreatedByEmailMinOne = 0
+
+export const adminCampaignsControllerCreateV1201Response = zod.object({
+  id: zod.uuid().regex(adminCampaignsControllerCreateV1201ResponseIdRegExp),
+  name: zod.string(),
+  status: zod.enum(["draft", "scheduled", "sending", "sent", "canceled", "failed"]),
+  sourceLanguage: zod.enum(["en", "tr"]),
+  messages: zod
+    .record(
+      zod.string(),
+      zod.object({
+        title: zod.string().min(1).max(adminCampaignsControllerCreateV1201ResponseMessagesTitleMax),
+        body: zod.string().min(1).max(adminCampaignsControllerCreateV1201ResponseMessagesBodyMax),
+      }),
+    )
+    .describe("by app language; a user's language falls back to en, then the source"),
+  audience: zod.object({
+    segment: zod
+      .enum(["all", "pro", "free", "guests", "signedIn"])
+      .describe("pro = featureAccess or proActive"),
+    levels: zod
+      .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+      .max(adminCampaignsControllerCreateV1201ResponseAudienceLevelsMax)
+      .optional(),
+    languages: zod
+      .array(
+        zod.enum([
+          "ar",
+          "de",
+          "en",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "it",
+          "ja",
+          "ko",
+          "pl",
+          "pt",
+          "ru",
+          "tr",
+          "vi",
+          "zh",
+        ]),
+      )
+      .max(adminCampaignsControllerCreateV1201ResponseAudienceLanguagesMax)
+      .optional()
+      .describe("the app language"),
+    inactiveDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerCreateV1201ResponseAudienceInactiveDaysMax)
+      .optional()
+      .describe("not seen for at least N days"),
+    activeWithinDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerCreateV1201ResponseAudienceActiveWithinDaysMax)
+      .optional()
+      .describe("seen within the last N days"),
+    podcastIds: zod
+      .array(zod.uuid().regex(adminCampaignsControllerCreateV1201ResponseAudiencePodcastIdsItemRegExp))
+      .max(adminCampaignsControllerCreateV1201ResponseAudiencePodcastIdsMax)
+      .optional()
+      .describe("followers of any of these podcasts"),
+  }),
+  link: zod.object({
+    type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+    id: zod
+      .uuid()
+      .regex(adminCampaignsControllerCreateV1201ResponseLinkIdRegExp)
+      .optional()
+      .describe("episode (episode, player) or podcast id"),
+    level: zod
+      .enum(["bg", "in", "ad"])
+      .optional()
+      .describe("bg = beginner, in = intermediate, ad = advanced"),
+  }),
+  imageUrl: zod.union([
+    zod.string().min(adminCampaignsControllerCreateV1201ResponseImageUrlMinOne),
+    zod.null(),
+  ]),
+  respectQuietHours: zod.boolean(),
+  delivery: zod.union([
+    zod.union([
+      zod.object({
+        mode: zod.literal("now"),
+      }),
+      zod.object({
+        mode: zod.literal("at"),
+        sendAt: zod.iso.datetime({}).regex(adminCampaignsControllerCreateV1201ResponseDeliverySendAtRegExp),
+      }),
+      zod.object({
+        mode: zod.literal("local"),
+        date: zod.string(),
+        time: zod
+          .string()
+          .regex(adminCampaignsControllerCreateV1201ResponseDeliveryTimeRegExp)
+          .describe("each user's local time"),
+      }),
+    ]),
+    zod.null(),
+  ]),
+  recipients: zod
+    .union([
+      zod
+        .number()
+        .min(adminCampaignsControllerCreateV1201ResponseRecipientsMinOne)
+        .max(adminCampaignsControllerCreateV1201ResponseRecipientsMaxOne),
+      zod.null(),
+    ])
+    .describe("users it was queued for (set when sending starts)"),
+  sentAt: zod
+    .union([zod.string().min(adminCampaignsControllerCreateV1201ResponseSentAtMinOne), zod.null()])
+    .describe("ISO timestamp"),
+  createdBy: zod.union([
+    zod.object({
+      id: zod.uuid().regex(adminCampaignsControllerCreateV1201ResponseCreatedByIdRegExp),
+      email: zod.union([
+        zod.string().min(adminCampaignsControllerCreateV1201ResponseCreatedByEmailMinOne),
+        zod.null(),
+      ]),
+    }),
+    zod.null(),
+  ]),
+  createdAt: zod.string().describe("ISO timestamp"),
+  updatedAt: zod.string().describe("ISO timestamp"),
+})
+
+export const adminCampaignsControllerGetV1200ResponseIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerGetV1200ResponseMessagesTitleMax = 60
+
+export const adminCampaignsControllerGetV1200ResponseMessagesBodyMax = 180
+
+export const adminCampaignsControllerGetV1200ResponseAudienceLevelsMax = 3
+
+export const adminCampaignsControllerGetV1200ResponseAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerGetV1200ResponseAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerGetV1200ResponseAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerGetV1200ResponseAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerGetV1200ResponseAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerGetV1200ResponseLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerGetV1200ResponseImageUrlMinOne = 0
+
+export const adminCampaignsControllerGetV1200ResponseDeliverySendAtRegExp = new RegExp(
+  "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+)
+export const adminCampaignsControllerGetV1200ResponseDeliveryTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminCampaignsControllerGetV1200ResponseRecipientsMinOne = -9007199254740991
+export const adminCampaignsControllerGetV1200ResponseRecipientsMaxOne = 9007199254740991
+
+export const adminCampaignsControllerGetV1200ResponseSentAtMinOne = 0
+
+export const adminCampaignsControllerGetV1200ResponseCreatedByIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerGetV1200ResponseCreatedByEmailMinOne = 0
+
+export const adminCampaignsControllerGetV1200Response = zod.object({
+  id: zod.uuid().regex(adminCampaignsControllerGetV1200ResponseIdRegExp),
+  name: zod.string(),
+  status: zod.enum(["draft", "scheduled", "sending", "sent", "canceled", "failed"]),
+  sourceLanguage: zod.enum(["en", "tr"]),
+  messages: zod
+    .record(
+      zod.string(),
+      zod.object({
+        title: zod.string().min(1).max(adminCampaignsControllerGetV1200ResponseMessagesTitleMax),
+        body: zod.string().min(1).max(adminCampaignsControllerGetV1200ResponseMessagesBodyMax),
+      }),
+    )
+    .describe("by app language; a user's language falls back to en, then the source"),
+  audience: zod.object({
+    segment: zod
+      .enum(["all", "pro", "free", "guests", "signedIn"])
+      .describe("pro = featureAccess or proActive"),
+    levels: zod
+      .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+      .max(adminCampaignsControllerGetV1200ResponseAudienceLevelsMax)
+      .optional(),
+    languages: zod
+      .array(
+        zod.enum([
+          "ar",
+          "de",
+          "en",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "it",
+          "ja",
+          "ko",
+          "pl",
+          "pt",
+          "ru",
+          "tr",
+          "vi",
+          "zh",
+        ]),
+      )
+      .max(adminCampaignsControllerGetV1200ResponseAudienceLanguagesMax)
+      .optional()
+      .describe("the app language"),
+    inactiveDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerGetV1200ResponseAudienceInactiveDaysMax)
+      .optional()
+      .describe("not seen for at least N days"),
+    activeWithinDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerGetV1200ResponseAudienceActiveWithinDaysMax)
+      .optional()
+      .describe("seen within the last N days"),
+    podcastIds: zod
+      .array(zod.uuid().regex(adminCampaignsControllerGetV1200ResponseAudiencePodcastIdsItemRegExp))
+      .max(adminCampaignsControllerGetV1200ResponseAudiencePodcastIdsMax)
+      .optional()
+      .describe("followers of any of these podcasts"),
+  }),
+  link: zod.object({
+    type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+    id: zod
+      .uuid()
+      .regex(adminCampaignsControllerGetV1200ResponseLinkIdRegExp)
+      .optional()
+      .describe("episode (episode, player) or podcast id"),
+    level: zod
+      .enum(["bg", "in", "ad"])
+      .optional()
+      .describe("bg = beginner, in = intermediate, ad = advanced"),
+  }),
+  imageUrl: zod.union([zod.string().min(adminCampaignsControllerGetV1200ResponseImageUrlMinOne), zod.null()]),
+  respectQuietHours: zod.boolean(),
+  delivery: zod.union([
+    zod.union([
+      zod.object({
+        mode: zod.literal("now"),
+      }),
+      zod.object({
+        mode: zod.literal("at"),
+        sendAt: zod.iso.datetime({}).regex(adminCampaignsControllerGetV1200ResponseDeliverySendAtRegExp),
+      }),
+      zod.object({
+        mode: zod.literal("local"),
+        date: zod.string(),
+        time: zod
+          .string()
+          .regex(adminCampaignsControllerGetV1200ResponseDeliveryTimeRegExp)
+          .describe("each user's local time"),
+      }),
+    ]),
+    zod.null(),
+  ]),
+  recipients: zod
+    .union([
+      zod
+        .number()
+        .min(adminCampaignsControllerGetV1200ResponseRecipientsMinOne)
+        .max(adminCampaignsControllerGetV1200ResponseRecipientsMaxOne),
+      zod.null(),
+    ])
+    .describe("users it was queued for (set when sending starts)"),
+  sentAt: zod
+    .union([zod.string().min(adminCampaignsControllerGetV1200ResponseSentAtMinOne), zod.null()])
+    .describe("ISO timestamp"),
+  createdBy: zod.union([
+    zod.object({
+      id: zod.uuid().regex(adminCampaignsControllerGetV1200ResponseCreatedByIdRegExp),
+      email: zod.union([
+        zod.string().min(adminCampaignsControllerGetV1200ResponseCreatedByEmailMinOne),
+        zod.null(),
+      ]),
+    }),
+    zod.null(),
+  ]),
+  createdAt: zod.string().describe("ISO timestamp"),
+  updatedAt: zod.string().describe("ISO timestamp"),
+})
+
+export const adminCampaignsControllerUpdateV1BodyNameMax = 120
+
+export const adminCampaignsControllerUpdateV1BodyMessagesTitleMax = 60
+
+export const adminCampaignsControllerUpdateV1BodyMessagesBodyMax = 180
+
+export const adminCampaignsControllerUpdateV1BodyAudienceLevelsMax = 3
+
+export const adminCampaignsControllerUpdateV1BodyAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerUpdateV1BodyAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerUpdateV1BodyAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerUpdateV1BodyAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerUpdateV1BodyAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerUpdateV1BodyLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerUpdateV1BodyImageUrlMaxOne = 2000
+
+export const adminCampaignsControllerUpdateV1Body = zod.object({
+  name: zod.string().min(1).max(adminCampaignsControllerUpdateV1BodyNameMax).optional(),
+  sourceLanguage: zod.enum(["en", "tr"]).optional(),
+  messages: zod
+    .record(
+      zod.string(),
+      zod.object({
+        title: zod.string().min(1).max(adminCampaignsControllerUpdateV1BodyMessagesTitleMax),
+        body: zod.string().min(1).max(adminCampaignsControllerUpdateV1BodyMessagesBodyMax),
+      }),
+    )
+    .optional()
+    .describe("by app language; a user's language falls back to en, then the source"),
+  audience: zod
+    .object({
+      segment: zod
+        .enum(["all", "pro", "free", "guests", "signedIn"])
+        .describe("pro = featureAccess or proActive"),
+      levels: zod
+        .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+        .max(adminCampaignsControllerUpdateV1BodyAudienceLevelsMax)
+        .optional(),
+      languages: zod
+        .array(
+          zod.enum([
+            "ar",
+            "de",
+            "en",
+            "es",
+            "fr",
+            "hi",
+            "id",
+            "it",
+            "ja",
+            "ko",
+            "pl",
+            "pt",
+            "ru",
+            "tr",
+            "vi",
+            "zh",
+          ]),
+        )
+        .max(adminCampaignsControllerUpdateV1BodyAudienceLanguagesMax)
+        .optional()
+        .describe("the app language"),
+      inactiveDays: zod
+        .number()
+        .min(1)
+        .max(adminCampaignsControllerUpdateV1BodyAudienceInactiveDaysMax)
+        .optional()
+        .describe("not seen for at least N days"),
+      activeWithinDays: zod
+        .number()
+        .min(1)
+        .max(adminCampaignsControllerUpdateV1BodyAudienceActiveWithinDaysMax)
+        .optional()
+        .describe("seen within the last N days"),
+      podcastIds: zod
+        .array(zod.uuid().regex(adminCampaignsControllerUpdateV1BodyAudiencePodcastIdsItemRegExp))
+        .max(adminCampaignsControllerUpdateV1BodyAudiencePodcastIdsMax)
+        .optional()
+        .describe("followers of any of these podcasts"),
+    })
+    .optional(),
+  link: zod
+    .object({
+      type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+      id: zod
+        .uuid()
+        .regex(adminCampaignsControllerUpdateV1BodyLinkIdRegExp)
+        .optional()
+        .describe("episode (episode, player) or podcast id"),
+      level: zod
+        .enum(["bg", "in", "ad"])
+        .optional()
+        .describe("bg = beginner, in = intermediate, ad = advanced"),
+    })
+    .optional(),
+  imageUrl: zod
+    .union([zod.url().max(adminCampaignsControllerUpdateV1BodyImageUrlMaxOne), zod.null()])
+    .optional(),
+  respectQuietHours: zod.boolean().optional().describe("default true"),
+})
+
+export const adminCampaignsControllerUpdateV1200ResponseIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerUpdateV1200ResponseMessagesTitleMax = 60
+
+export const adminCampaignsControllerUpdateV1200ResponseMessagesBodyMax = 180
+
+export const adminCampaignsControllerUpdateV1200ResponseAudienceLevelsMax = 3
+
+export const adminCampaignsControllerUpdateV1200ResponseAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerUpdateV1200ResponseAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerUpdateV1200ResponseAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerUpdateV1200ResponseAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerUpdateV1200ResponseAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerUpdateV1200ResponseLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerUpdateV1200ResponseImageUrlMinOne = 0
+
+export const adminCampaignsControllerUpdateV1200ResponseDeliverySendAtRegExp = new RegExp(
+  "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+)
+export const adminCampaignsControllerUpdateV1200ResponseDeliveryTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminCampaignsControllerUpdateV1200ResponseRecipientsMinOne = -9007199254740991
+export const adminCampaignsControllerUpdateV1200ResponseRecipientsMaxOne = 9007199254740991
+
+export const adminCampaignsControllerUpdateV1200ResponseSentAtMinOne = 0
+
+export const adminCampaignsControllerUpdateV1200ResponseCreatedByIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerUpdateV1200ResponseCreatedByEmailMinOne = 0
+
+export const adminCampaignsControllerUpdateV1200Response = zod.object({
+  id: zod.uuid().regex(adminCampaignsControllerUpdateV1200ResponseIdRegExp),
+  name: zod.string(),
+  status: zod.enum(["draft", "scheduled", "sending", "sent", "canceled", "failed"]),
+  sourceLanguage: zod.enum(["en", "tr"]),
+  messages: zod
+    .record(
+      zod.string(),
+      zod.object({
+        title: zod.string().min(1).max(adminCampaignsControllerUpdateV1200ResponseMessagesTitleMax),
+        body: zod.string().min(1).max(adminCampaignsControllerUpdateV1200ResponseMessagesBodyMax),
+      }),
+    )
+    .describe("by app language; a user's language falls back to en, then the source"),
+  audience: zod.object({
+    segment: zod
+      .enum(["all", "pro", "free", "guests", "signedIn"])
+      .describe("pro = featureAccess or proActive"),
+    levels: zod
+      .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+      .max(adminCampaignsControllerUpdateV1200ResponseAudienceLevelsMax)
+      .optional(),
+    languages: zod
+      .array(
+        zod.enum([
+          "ar",
+          "de",
+          "en",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "it",
+          "ja",
+          "ko",
+          "pl",
+          "pt",
+          "ru",
+          "tr",
+          "vi",
+          "zh",
+        ]),
+      )
+      .max(adminCampaignsControllerUpdateV1200ResponseAudienceLanguagesMax)
+      .optional()
+      .describe("the app language"),
+    inactiveDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerUpdateV1200ResponseAudienceInactiveDaysMax)
+      .optional()
+      .describe("not seen for at least N days"),
+    activeWithinDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerUpdateV1200ResponseAudienceActiveWithinDaysMax)
+      .optional()
+      .describe("seen within the last N days"),
+    podcastIds: zod
+      .array(zod.uuid().regex(adminCampaignsControllerUpdateV1200ResponseAudiencePodcastIdsItemRegExp))
+      .max(adminCampaignsControllerUpdateV1200ResponseAudiencePodcastIdsMax)
+      .optional()
+      .describe("followers of any of these podcasts"),
+  }),
+  link: zod.object({
+    type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+    id: zod
+      .uuid()
+      .regex(adminCampaignsControllerUpdateV1200ResponseLinkIdRegExp)
+      .optional()
+      .describe("episode (episode, player) or podcast id"),
+    level: zod
+      .enum(["bg", "in", "ad"])
+      .optional()
+      .describe("bg = beginner, in = intermediate, ad = advanced"),
+  }),
+  imageUrl: zod.union([
+    zod.string().min(adminCampaignsControllerUpdateV1200ResponseImageUrlMinOne),
+    zod.null(),
+  ]),
+  respectQuietHours: zod.boolean(),
+  delivery: zod.union([
+    zod.union([
+      zod.object({
+        mode: zod.literal("now"),
+      }),
+      zod.object({
+        mode: zod.literal("at"),
+        sendAt: zod.iso.datetime({}).regex(adminCampaignsControllerUpdateV1200ResponseDeliverySendAtRegExp),
+      }),
+      zod.object({
+        mode: zod.literal("local"),
+        date: zod.string(),
+        time: zod
+          .string()
+          .regex(adminCampaignsControllerUpdateV1200ResponseDeliveryTimeRegExp)
+          .describe("each user's local time"),
+      }),
+    ]),
+    zod.null(),
+  ]),
+  recipients: zod
+    .union([
+      zod
+        .number()
+        .min(adminCampaignsControllerUpdateV1200ResponseRecipientsMinOne)
+        .max(adminCampaignsControllerUpdateV1200ResponseRecipientsMaxOne),
+      zod.null(),
+    ])
+    .describe("users it was queued for (set when sending starts)"),
+  sentAt: zod
+    .union([zod.string().min(adminCampaignsControllerUpdateV1200ResponseSentAtMinOne), zod.null()])
+    .describe("ISO timestamp"),
+  createdBy: zod.union([
+    zod.object({
+      id: zod.uuid().regex(adminCampaignsControllerUpdateV1200ResponseCreatedByIdRegExp),
+      email: zod.union([
+        zod.string().min(adminCampaignsControllerUpdateV1200ResponseCreatedByEmailMinOne),
+        zod.null(),
+      ]),
+    }),
+    zod.null(),
+  ]),
+  createdAt: zod.string().describe("ISO timestamp"),
+  updatedAt: zod.string().describe("ISO timestamp"),
+})
+
+export const adminCampaignsControllerSendV1BodyDeliverySendAtRegExp = new RegExp(
+  "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+)
+export const adminCampaignsControllerSendV1BodyDeliveryTimeRegExp = new RegExp("^([01]\\d|2[0-3]):[0-5]\\d$")
+
+export const adminCampaignsControllerSendV1Body = zod.object({
+  delivery: zod.union([
+    zod.object({
+      mode: zod.literal("now"),
+    }),
+    zod.object({
+      mode: zod.literal("at"),
+      sendAt: zod.iso.datetime({}).regex(adminCampaignsControllerSendV1BodyDeliverySendAtRegExp),
+    }),
+    zod.object({
+      mode: zod.literal("local"),
+      date: zod.string(),
+      time: zod
+        .string()
+        .regex(adminCampaignsControllerSendV1BodyDeliveryTimeRegExp)
+        .describe("each user's local time"),
+    }),
+  ]),
+})
+
+export const adminCampaignsControllerSendV1200ResponseIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerSendV1200ResponseMessagesTitleMax = 60
+
+export const adminCampaignsControllerSendV1200ResponseMessagesBodyMax = 180
+
+export const adminCampaignsControllerSendV1200ResponseAudienceLevelsMax = 3
+
+export const adminCampaignsControllerSendV1200ResponseAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerSendV1200ResponseAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerSendV1200ResponseAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerSendV1200ResponseAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerSendV1200ResponseAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerSendV1200ResponseLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerSendV1200ResponseImageUrlMinOne = 0
+
+export const adminCampaignsControllerSendV1200ResponseDeliverySendAtRegExp = new RegExp(
+  "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+)
+export const adminCampaignsControllerSendV1200ResponseDeliveryTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminCampaignsControllerSendV1200ResponseRecipientsMinOne = -9007199254740991
+export const adminCampaignsControllerSendV1200ResponseRecipientsMaxOne = 9007199254740991
+
+export const adminCampaignsControllerSendV1200ResponseSentAtMinOne = 0
+
+export const adminCampaignsControllerSendV1200ResponseCreatedByIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerSendV1200ResponseCreatedByEmailMinOne = 0
+
+export const adminCampaignsControllerSendV1200Response = zod.object({
+  id: zod.uuid().regex(adminCampaignsControllerSendV1200ResponseIdRegExp),
+  name: zod.string(),
+  status: zod.enum(["draft", "scheduled", "sending", "sent", "canceled", "failed"]),
+  sourceLanguage: zod.enum(["en", "tr"]),
+  messages: zod
+    .record(
+      zod.string(),
+      zod.object({
+        title: zod.string().min(1).max(adminCampaignsControllerSendV1200ResponseMessagesTitleMax),
+        body: zod.string().min(1).max(adminCampaignsControllerSendV1200ResponseMessagesBodyMax),
+      }),
+    )
+    .describe("by app language; a user's language falls back to en, then the source"),
+  audience: zod.object({
+    segment: zod
+      .enum(["all", "pro", "free", "guests", "signedIn"])
+      .describe("pro = featureAccess or proActive"),
+    levels: zod
+      .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+      .max(adminCampaignsControllerSendV1200ResponseAudienceLevelsMax)
+      .optional(),
+    languages: zod
+      .array(
+        zod.enum([
+          "ar",
+          "de",
+          "en",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "it",
+          "ja",
+          "ko",
+          "pl",
+          "pt",
+          "ru",
+          "tr",
+          "vi",
+          "zh",
+        ]),
+      )
+      .max(adminCampaignsControllerSendV1200ResponseAudienceLanguagesMax)
+      .optional()
+      .describe("the app language"),
+    inactiveDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerSendV1200ResponseAudienceInactiveDaysMax)
+      .optional()
+      .describe("not seen for at least N days"),
+    activeWithinDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerSendV1200ResponseAudienceActiveWithinDaysMax)
+      .optional()
+      .describe("seen within the last N days"),
+    podcastIds: zod
+      .array(zod.uuid().regex(adminCampaignsControllerSendV1200ResponseAudiencePodcastIdsItemRegExp))
+      .max(adminCampaignsControllerSendV1200ResponseAudiencePodcastIdsMax)
+      .optional()
+      .describe("followers of any of these podcasts"),
+  }),
+  link: zod.object({
+    type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+    id: zod
+      .uuid()
+      .regex(adminCampaignsControllerSendV1200ResponseLinkIdRegExp)
+      .optional()
+      .describe("episode (episode, player) or podcast id"),
+    level: zod
+      .enum(["bg", "in", "ad"])
+      .optional()
+      .describe("bg = beginner, in = intermediate, ad = advanced"),
+  }),
+  imageUrl: zod.union([
+    zod.string().min(adminCampaignsControllerSendV1200ResponseImageUrlMinOne),
+    zod.null(),
+  ]),
+  respectQuietHours: zod.boolean(),
+  delivery: zod.union([
+    zod.union([
+      zod.object({
+        mode: zod.literal("now"),
+      }),
+      zod.object({
+        mode: zod.literal("at"),
+        sendAt: zod.iso.datetime({}).regex(adminCampaignsControllerSendV1200ResponseDeliverySendAtRegExp),
+      }),
+      zod.object({
+        mode: zod.literal("local"),
+        date: zod.string(),
+        time: zod
+          .string()
+          .regex(adminCampaignsControllerSendV1200ResponseDeliveryTimeRegExp)
+          .describe("each user's local time"),
+      }),
+    ]),
+    zod.null(),
+  ]),
+  recipients: zod
+    .union([
+      zod
+        .number()
+        .min(adminCampaignsControllerSendV1200ResponseRecipientsMinOne)
+        .max(adminCampaignsControllerSendV1200ResponseRecipientsMaxOne),
+      zod.null(),
+    ])
+    .describe("users it was queued for (set when sending starts)"),
+  sentAt: zod
+    .union([zod.string().min(adminCampaignsControllerSendV1200ResponseSentAtMinOne), zod.null()])
+    .describe("ISO timestamp"),
+  createdBy: zod.union([
+    zod.object({
+      id: zod.uuid().regex(adminCampaignsControllerSendV1200ResponseCreatedByIdRegExp),
+      email: zod.union([
+        zod.string().min(adminCampaignsControllerSendV1200ResponseCreatedByEmailMinOne),
+        zod.null(),
+      ]),
+    }),
+    zod.null(),
+  ]),
+  createdAt: zod.string().describe("ISO timestamp"),
+  updatedAt: zod.string().describe("ISO timestamp"),
+})
+
+export const adminCampaignsControllerCancelV1200ResponseIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCancelV1200ResponseMessagesTitleMax = 60
+
+export const adminCampaignsControllerCancelV1200ResponseMessagesBodyMax = 180
+
+export const adminCampaignsControllerCancelV1200ResponseAudienceLevelsMax = 3
+
+export const adminCampaignsControllerCancelV1200ResponseAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerCancelV1200ResponseAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerCancelV1200ResponseAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerCancelV1200ResponseAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCancelV1200ResponseAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerCancelV1200ResponseLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCancelV1200ResponseImageUrlMinOne = 0
+
+export const adminCampaignsControllerCancelV1200ResponseDeliverySendAtRegExp = new RegExp(
+  "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+)
+export const adminCampaignsControllerCancelV1200ResponseDeliveryTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminCampaignsControllerCancelV1200ResponseRecipientsMinOne = -9007199254740991
+export const adminCampaignsControllerCancelV1200ResponseRecipientsMaxOne = 9007199254740991
+
+export const adminCampaignsControllerCancelV1200ResponseSentAtMinOne = 0
+
+export const adminCampaignsControllerCancelV1200ResponseCreatedByIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerCancelV1200ResponseCreatedByEmailMinOne = 0
+
+export const adminCampaignsControllerCancelV1200Response = zod.object({
+  id: zod.uuid().regex(adminCampaignsControllerCancelV1200ResponseIdRegExp),
+  name: zod.string(),
+  status: zod.enum(["draft", "scheduled", "sending", "sent", "canceled", "failed"]),
+  sourceLanguage: zod.enum(["en", "tr"]),
+  messages: zod
+    .record(
+      zod.string(),
+      zod.object({
+        title: zod.string().min(1).max(adminCampaignsControllerCancelV1200ResponseMessagesTitleMax),
+        body: zod.string().min(1).max(adminCampaignsControllerCancelV1200ResponseMessagesBodyMax),
+      }),
+    )
+    .describe("by app language; a user's language falls back to en, then the source"),
+  audience: zod.object({
+    segment: zod
+      .enum(["all", "pro", "free", "guests", "signedIn"])
+      .describe("pro = featureAccess or proActive"),
+    levels: zod
+      .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+      .max(adminCampaignsControllerCancelV1200ResponseAudienceLevelsMax)
+      .optional(),
+    languages: zod
+      .array(
+        zod.enum([
+          "ar",
+          "de",
+          "en",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "it",
+          "ja",
+          "ko",
+          "pl",
+          "pt",
+          "ru",
+          "tr",
+          "vi",
+          "zh",
+        ]),
+      )
+      .max(adminCampaignsControllerCancelV1200ResponseAudienceLanguagesMax)
+      .optional()
+      .describe("the app language"),
+    inactiveDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerCancelV1200ResponseAudienceInactiveDaysMax)
+      .optional()
+      .describe("not seen for at least N days"),
+    activeWithinDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerCancelV1200ResponseAudienceActiveWithinDaysMax)
+      .optional()
+      .describe("seen within the last N days"),
+    podcastIds: zod
+      .array(zod.uuid().regex(adminCampaignsControllerCancelV1200ResponseAudiencePodcastIdsItemRegExp))
+      .max(adminCampaignsControllerCancelV1200ResponseAudiencePodcastIdsMax)
+      .optional()
+      .describe("followers of any of these podcasts"),
+  }),
+  link: zod.object({
+    type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+    id: zod
+      .uuid()
+      .regex(adminCampaignsControllerCancelV1200ResponseLinkIdRegExp)
+      .optional()
+      .describe("episode (episode, player) or podcast id"),
+    level: zod
+      .enum(["bg", "in", "ad"])
+      .optional()
+      .describe("bg = beginner, in = intermediate, ad = advanced"),
+  }),
+  imageUrl: zod.union([
+    zod.string().min(adminCampaignsControllerCancelV1200ResponseImageUrlMinOne),
+    zod.null(),
+  ]),
+  respectQuietHours: zod.boolean(),
+  delivery: zod.union([
+    zod.union([
+      zod.object({
+        mode: zod.literal("now"),
+      }),
+      zod.object({
+        mode: zod.literal("at"),
+        sendAt: zod.iso.datetime({}).regex(adminCampaignsControllerCancelV1200ResponseDeliverySendAtRegExp),
+      }),
+      zod.object({
+        mode: zod.literal("local"),
+        date: zod.string(),
+        time: zod
+          .string()
+          .regex(adminCampaignsControllerCancelV1200ResponseDeliveryTimeRegExp)
+          .describe("each user's local time"),
+      }),
+    ]),
+    zod.null(),
+  ]),
+  recipients: zod
+    .union([
+      zod
+        .number()
+        .min(adminCampaignsControllerCancelV1200ResponseRecipientsMinOne)
+        .max(adminCampaignsControllerCancelV1200ResponseRecipientsMaxOne),
+      zod.null(),
+    ])
+    .describe("users it was queued for (set when sending starts)"),
+  sentAt: zod
+    .union([zod.string().min(adminCampaignsControllerCancelV1200ResponseSentAtMinOne), zod.null()])
+    .describe("ISO timestamp"),
+  createdBy: zod.union([
+    zod.object({
+      id: zod.uuid().regex(adminCampaignsControllerCancelV1200ResponseCreatedByIdRegExp),
+      email: zod.union([
+        zod.string().min(adminCampaignsControllerCancelV1200ResponseCreatedByEmailMinOne),
+        zod.null(),
+      ]),
+    }),
+    zod.null(),
+  ]),
+  createdAt: zod.string().describe("ISO timestamp"),
+  updatedAt: zod.string().describe("ISO timestamp"),
+})
+
+export const adminCampaignsControllerTestV1BodyUserIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerTestV1BodyEmailRegExp = new RegExp(
+  "^(?:[A-Za-z0-9_'+\\-]+\\.)\*[A-Za-z0-9_'+\\-]\*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]\*\\.)+[A-Za-z]{2,}$",
+)
+
+export const adminCampaignsControllerTestV1Body = zod.object({
+  language: zod
+    .enum(["ar", "de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "pl", "pt", "ru", "tr", "vi", "zh"])
+    .optional(),
+  userId: zod.uuid().regex(adminCampaignsControllerTestV1BodyUserIdRegExp).optional(),
+  email: zod.email().regex(adminCampaignsControllerTestV1BodyEmailRegExp).optional(),
+})
+
+export const adminCampaignsControllerTestV1200ResponseOnesignalIdMinOne = 0
+
+export const adminCampaignsControllerTestV1200Response = zod.object({
+  onesignalId: zod.union([
+    zod.string().min(adminCampaignsControllerTestV1200ResponseOnesignalIdMinOne),
+    zod.null(),
+  ]),
+})
+
+export const adminCampaignsControllerStatsV1200ResponseRecipientsMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseRecipientsMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseQueuedMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseQueuedMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseSentMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseSentMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseFailedMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseFailedMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseUnreachableMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseUnreachableMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseSkippedMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseSkippedMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseOpenedMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseOpenedMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseOnesignalSuccessfulMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseOnesignalSuccessfulMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseOnesignalFailedMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseOnesignalFailedMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseOnesignalErroredMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseOnesignalErroredMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseOnesignalConvertedMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseOnesignalConvertedMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseOnesignalReceivedMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseOnesignalReceivedMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseByLanguageItemRecipientsMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseByLanguageItemRecipientsMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseByLanguageItemOpenedMin = -9007199254740991
+export const adminCampaignsControllerStatsV1200ResponseByLanguageItemOpenedMax = 9007199254740991
+
+export const adminCampaignsControllerStatsV1200ResponseRefreshedAtMinOne = 0
+
+export const adminCampaignsControllerStatsV1200Response = zod.object({
+  recipients: zod
+    .number()
+    .min(adminCampaignsControllerStatsV1200ResponseRecipientsMin)
+    .max(adminCampaignsControllerStatsV1200ResponseRecipientsMax),
+  queued: zod
+    .number()
+    .min(adminCampaignsControllerStatsV1200ResponseQueuedMin)
+    .max(adminCampaignsControllerStatsV1200ResponseQueuedMax),
+  sent: zod
+    .number()
+    .min(adminCampaignsControllerStatsV1200ResponseSentMin)
+    .max(adminCampaignsControllerStatsV1200ResponseSentMax),
+  failed: zod
+    .number()
+    .min(adminCampaignsControllerStatsV1200ResponseFailedMin)
+    .max(adminCampaignsControllerStatsV1200ResponseFailedMax),
+  unreachable: zod
+    .number()
+    .min(adminCampaignsControllerStatsV1200ResponseUnreachableMin)
+    .max(adminCampaignsControllerStatsV1200ResponseUnreachableMax),
+  skipped: zod
+    .number()
+    .min(adminCampaignsControllerStatsV1200ResponseSkippedMin)
+    .max(adminCampaignsControllerStatsV1200ResponseSkippedMax),
+  opened: zod
+    .number()
+    .min(adminCampaignsControllerStatsV1200ResponseOpenedMin)
+    .max(adminCampaignsControllerStatsV1200ResponseOpenedMax),
+  onesignal: zod.union([
+    zod.object({
+      successful: zod
+        .number()
+        .min(adminCampaignsControllerStatsV1200ResponseOnesignalSuccessfulMin)
+        .max(adminCampaignsControllerStatsV1200ResponseOnesignalSuccessfulMax),
+      failed: zod
+        .number()
+        .min(adminCampaignsControllerStatsV1200ResponseOnesignalFailedMin)
+        .max(adminCampaignsControllerStatsV1200ResponseOnesignalFailedMax),
+      errored: zod
+        .number()
+        .min(adminCampaignsControllerStatsV1200ResponseOnesignalErroredMin)
+        .max(adminCampaignsControllerStatsV1200ResponseOnesignalErroredMax),
+      converted: zod
+        .number()
+        .min(adminCampaignsControllerStatsV1200ResponseOnesignalConvertedMin)
+        .max(adminCampaignsControllerStatsV1200ResponseOnesignalConvertedMax),
+      received: zod
+        .number()
+        .min(adminCampaignsControllerStatsV1200ResponseOnesignalReceivedMin)
+        .max(adminCampaignsControllerStatsV1200ResponseOnesignalReceivedMax),
+    }),
+    zod.null(),
+  ]),
+  byLanguage: zod.array(
+    zod.object({
+      language: zod.enum([
+        "ar",
+        "de",
+        "en",
+        "es",
+        "fr",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "pl",
+        "pt",
+        "ru",
+        "tr",
+        "vi",
+        "zh",
+      ]),
+      recipients: zod
+        .number()
+        .min(adminCampaignsControllerStatsV1200ResponseByLanguageItemRecipientsMin)
+        .max(adminCampaignsControllerStatsV1200ResponseByLanguageItemRecipientsMax),
+      opened: zod
+        .number()
+        .min(adminCampaignsControllerStatsV1200ResponseByLanguageItemOpenedMin)
+        .max(adminCampaignsControllerStatsV1200ResponseByLanguageItemOpenedMax),
+    }),
+  ),
+  refreshedAt: zod
+    .union([zod.string().min(adminCampaignsControllerStatsV1200ResponseRefreshedAtMinOne), zod.null()])
+    .describe("ISO timestamp"),
+})
+
+export const adminCampaignsControllerTranslateV1BodyTitleMax = 60
+
+export const adminCampaignsControllerTranslateV1BodyBodyMax = 180
+
+export const adminCampaignsControllerTranslateV1Body = zod.object({
+  source: zod.enum(["en", "tr"]),
+  title: zod.string().min(1).max(adminCampaignsControllerTranslateV1BodyTitleMax),
+  body: zod.string().min(1).max(adminCampaignsControllerTranslateV1BodyBodyMax),
+})
+
+export const adminCampaignsControllerTranslateV1200ResponseMessagesTitleMax = 60
+
+export const adminCampaignsControllerTranslateV1200ResponseMessagesBodyMax = 180
+
+export const adminCampaignsControllerTranslateV1200Response = zod.object({
+  messages: zod.record(
+    zod.string(),
+    zod.object({
+      title: zod.string().min(1).max(adminCampaignsControllerTranslateV1200ResponseMessagesTitleMax),
+      body: zod.string().min(1).max(adminCampaignsControllerTranslateV1200ResponseMessagesBodyMax),
+    }),
+  ),
+})
+
+export const adminCampaignsControllerReachV1BodyAudienceLevelsMax = 3
+
+export const adminCampaignsControllerReachV1BodyAudienceLanguagesMax = 16
+
+export const adminCampaignsControllerReachV1BodyAudienceInactiveDaysMax = 3650
+
+export const adminCampaignsControllerReachV1BodyAudienceActiveWithinDaysMax = 3650
+
+export const adminCampaignsControllerReachV1BodyAudiencePodcastIdsItemRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminCampaignsControllerReachV1BodyAudiencePodcastIdsMax = 100
+
+export const adminCampaignsControllerReachV1Body = zod.object({
+  audience: zod.object({
+    segment: zod
+      .enum(["all", "pro", "free", "guests", "signedIn"])
+      .describe("pro = featureAccess or proActive"),
+    levels: zod
+      .array(zod.enum(["bg", "in", "ad"]).describe("bg = beginner, in = intermediate, ad = advanced"))
+      .max(adminCampaignsControllerReachV1BodyAudienceLevelsMax)
+      .optional(),
+    languages: zod
+      .array(
+        zod.enum([
+          "ar",
+          "de",
+          "en",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "it",
+          "ja",
+          "ko",
+          "pl",
+          "pt",
+          "ru",
+          "tr",
+          "vi",
+          "zh",
+        ]),
+      )
+      .max(adminCampaignsControllerReachV1BodyAudienceLanguagesMax)
+      .optional()
+      .describe("the app language"),
+    inactiveDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerReachV1BodyAudienceInactiveDaysMax)
+      .optional()
+      .describe("not seen for at least N days"),
+    activeWithinDays: zod
+      .number()
+      .min(1)
+      .max(adminCampaignsControllerReachV1BodyAudienceActiveWithinDaysMax)
+      .optional()
+      .describe("seen within the last N days"),
+    podcastIds: zod
+      .array(zod.uuid().regex(adminCampaignsControllerReachV1BodyAudiencePodcastIdsItemRegExp))
+      .max(adminCampaignsControllerReachV1BodyAudiencePodcastIdsMax)
+      .optional()
+      .describe("followers of any of these podcasts"),
+  }),
+})
+
+export const adminCampaignsControllerReachV1200ResponseMatchedMin = -9007199254740991
+export const adminCampaignsControllerReachV1200ResponseMatchedMax = 9007199254740991
+
+export const adminCampaignsControllerReachV1200ResponseReachableMin = -9007199254740991
+export const adminCampaignsControllerReachV1200ResponseReachableMax = 9007199254740991
+
+export const adminCampaignsControllerReachV1200ResponseByLanguageItemReachableMin = -9007199254740991
+export const adminCampaignsControllerReachV1200ResponseByLanguageItemReachableMax = 9007199254740991
+
+export const adminCampaignsControllerReachV1200Response = zod.object({
+  matched: zod
+    .number()
+    .min(adminCampaignsControllerReachV1200ResponseMatchedMin)
+    .max(adminCampaignsControllerReachV1200ResponseMatchedMax)
+    .describe("users matching the audience"),
+  reachable: zod
+    .number()
+    .min(adminCampaignsControllerReachV1200ResponseReachableMin)
+    .max(adminCampaignsControllerReachV1200ResponseReachableMax)
+    .describe("of them, with push on and notifyNews"),
+  byLanguage: zod.array(
+    zod.object({
+      language: zod.enum([
+        "ar",
+        "de",
+        "en",
+        "es",
+        "fr",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "pl",
+        "pt",
+        "ru",
+        "tr",
+        "vi",
+        "zh",
+      ]),
+      reachable: zod
+        .number()
+        .min(adminCampaignsControllerReachV1200ResponseByLanguageItemReachableMin)
+        .max(adminCampaignsControllerReachV1200ResponseByLanguageItemReachableMax),
+    }),
+  ),
+})
+
+export const adminAutomationsControllerStatusV1200ResponseLastTickAtMinOne = 0
+
+export const adminAutomationsControllerStatusV1200ResponseQueuedMin = -9007199254740991
+export const adminAutomationsControllerStatusV1200ResponseQueuedMax = 9007199254740991
+
+export const adminAutomationsControllerStatusV1200Response = zod.object({
+  configured: zod.boolean().describe("OneSignal keys set"),
+  enabled: zod.boolean().describe("NOTIFICATIONS_ENABLED"),
+  lastTickAt: zod
+    .union([zod.string().min(adminAutomationsControllerStatusV1200ResponseLastTickAtMinOne), zod.null()])
+    .describe("the scheduler's last completed run"),
+  queued: zod
+    .number()
+    .min(adminAutomationsControllerStatusV1200ResponseQueuedMin)
+    .max(adminAutomationsControllerStatusV1200ResponseQueuedMax)
+    .describe("sends waiting to go out"),
+})
+
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsQuietHoursFromRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsQuietHoursToRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsReminderMinDueMax = 500
+
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsStreakSaverTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsStreakSaverMinStreakMax = 365
+
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsLearningTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsNewEpisodesDebounceMinMin = 0
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsNewEpisodesDebounceMinMax = 1440
+
+export const adminAutomationsControllerAutomationsV1200ResponseSettingsNewEpisodesFreshHoursMax = 168
+
+export const adminAutomationsControllerAutomationsV1200ResponseStatusLastTickAtMinOne = 0
+
+export const adminAutomationsControllerAutomationsV1200ResponseStatusQueuedMin = -9007199254740991
+export const adminAutomationsControllerAutomationsV1200ResponseStatusQueuedMax = 9007199254740991
+
+export const adminAutomationsControllerAutomationsV1200ResponseLast7DaysItemSentMin = -9007199254740991
+export const adminAutomationsControllerAutomationsV1200ResponseLast7DaysItemSentMax = 9007199254740991
+
+export const adminAutomationsControllerAutomationsV1200ResponseLast7DaysItemOpenedMin = -9007199254740991
+export const adminAutomationsControllerAutomationsV1200ResponseLast7DaysItemOpenedMax = 9007199254740991
+
+export const adminAutomationsControllerAutomationsV1200Response = zod.object({
+  settings: zod.object({
+    quietHours: zod
+      .object({
+        from: zod
+          .string()
+          .regex(adminAutomationsControllerAutomationsV1200ResponseSettingsQuietHoursFromRegExp),
+        to: zod.string().regex(adminAutomationsControllerAutomationsV1200ResponseSettingsQuietHoursToRegExp),
+      })
+      .describe("local time, default 22:00–08:00"),
+    reminder: zod.object({
+      enabled: zod.boolean(),
+      weeklyRecap: zod.boolean().describe("Sunday: a recap of the week instead of the usual reminder"),
+      minDue: zod
+        .number()
+        .min(1)
+        .max(adminAutomationsControllerAutomationsV1200ResponseSettingsReminderMinDueMax)
+        .describe("words due before a words-due push (default 5)"),
+    }),
+    streakSaver: zod.object({
+      enabled: zod.boolean(),
+      time: zod
+        .string()
+        .regex(adminAutomationsControllerAutomationsV1200ResponseSettingsStreakSaverTimeRegExp)
+        .describe('local time (default \"21:00\")'),
+      minStreak: zod
+        .number()
+        .min(1)
+        .max(adminAutomationsControllerAutomationsV1200ResponseSettingsStreakSaverMinStreakMax)
+        .describe("default 2"),
+    }),
+    learning: zod.object({
+      enabled: zod.boolean(),
+      time: zod
+        .string()
+        .regex(adminAutomationsControllerAutomationsV1200ResponseSettingsLearningTimeRegExp)
+        .describe('local time (default \"18:00\")'),
+    }),
+    newEpisodes: zod.object({
+      enabled: zod.boolean(),
+      debounceMin: zod
+        .number()
+        .min(adminAutomationsControllerAutomationsV1200ResponseSettingsNewEpisodesDebounceMinMin)
+        .max(adminAutomationsControllerAutomationsV1200ResponseSettingsNewEpisodesDebounceMinMax)
+        .describe("wait after going live (bundles releases)"),
+      freshHours: zod
+        .number()
+        .min(1)
+        .max(adminAutomationsControllerAutomationsV1200ResponseSettingsNewEpisodesFreshHoursMax)
+        .describe("how long an episode stays pushable"),
+    }),
+  }),
+  status: zod.object({
+    configured: zod.boolean().describe("OneSignal keys set"),
+    enabled: zod.boolean().describe("NOTIFICATIONS_ENABLED"),
+    lastTickAt: zod
+      .union([
+        zod.string().min(adminAutomationsControllerAutomationsV1200ResponseStatusLastTickAtMinOne),
+        zod.null(),
+      ])
+      .describe("the scheduler's last completed run"),
+    queued: zod
+      .number()
+      .min(adminAutomationsControllerAutomationsV1200ResponseStatusQueuedMin)
+      .max(adminAutomationsControllerAutomationsV1200ResponseStatusQueuedMax)
+      .describe("sends waiting to go out"),
+  }),
+  last7Days: zod.array(
+    zod.object({
+      kind: zod.enum(["reminder", "streak_saver", "learning", "new_episodes", "campaign", "test"]),
+      sent: zod
+        .number()
+        .min(adminAutomationsControllerAutomationsV1200ResponseLast7DaysItemSentMin)
+        .max(adminAutomationsControllerAutomationsV1200ResponseLast7DaysItemSentMax),
+      opened: zod
+        .number()
+        .min(adminAutomationsControllerAutomationsV1200ResponseLast7DaysItemOpenedMin)
+        .max(adminAutomationsControllerAutomationsV1200ResponseLast7DaysItemOpenedMax),
+    }),
+  ),
+})
+
+export const adminAutomationsControllerPutV1BodyQuietHoursFromRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerPutV1BodyQuietHoursToRegExp = new RegExp("^([01]\\d|2[0-3]):[0-5]\\d$")
+export const adminAutomationsControllerPutV1BodyReminderMinDueMax = 500
+
+export const adminAutomationsControllerPutV1BodyStreakSaverTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerPutV1BodyStreakSaverMinStreakMax = 365
+
+export const adminAutomationsControllerPutV1BodyLearningTimeRegExp = new RegExp("^([01]\\d|2[0-3]):[0-5]\\d$")
+export const adminAutomationsControllerPutV1BodyNewEpisodesDebounceMinMin = 0
+export const adminAutomationsControllerPutV1BodyNewEpisodesDebounceMinMax = 1440
+
+export const adminAutomationsControllerPutV1BodyNewEpisodesFreshHoursMax = 168
+
+export const adminAutomationsControllerPutV1Body = zod.object({
+  quietHours: zod
+    .object({
+      from: zod.string().regex(adminAutomationsControllerPutV1BodyQuietHoursFromRegExp),
+      to: zod.string().regex(adminAutomationsControllerPutV1BodyQuietHoursToRegExp),
+    })
+    .describe("local time, default 22:00–08:00"),
+  reminder: zod.object({
+    enabled: zod.boolean(),
+    weeklyRecap: zod.boolean().describe("Sunday: a recap of the week instead of the usual reminder"),
+    minDue: zod
+      .number()
+      .min(1)
+      .max(adminAutomationsControllerPutV1BodyReminderMinDueMax)
+      .describe("words due before a words-due push (default 5)"),
+  }),
+  streakSaver: zod.object({
+    enabled: zod.boolean(),
+    time: zod
+      .string()
+      .regex(adminAutomationsControllerPutV1BodyStreakSaverTimeRegExp)
+      .describe('local time (default \"21:00\")'),
+    minStreak: zod
+      .number()
+      .min(1)
+      .max(adminAutomationsControllerPutV1BodyStreakSaverMinStreakMax)
+      .describe("default 2"),
+  }),
+  learning: zod.object({
+    enabled: zod.boolean(),
+    time: zod
+      .string()
+      .regex(adminAutomationsControllerPutV1BodyLearningTimeRegExp)
+      .describe('local time (default \"18:00\")'),
+  }),
+  newEpisodes: zod.object({
+    enabled: zod.boolean(),
+    debounceMin: zod
+      .number()
+      .min(adminAutomationsControllerPutV1BodyNewEpisodesDebounceMinMin)
+      .max(adminAutomationsControllerPutV1BodyNewEpisodesDebounceMinMax)
+      .describe("wait after going live (bundles releases)"),
+    freshHours: zod
+      .number()
+      .min(1)
+      .max(adminAutomationsControllerPutV1BodyNewEpisodesFreshHoursMax)
+      .describe("how long an episode stays pushable"),
+  }),
+})
+
+export const adminAutomationsControllerPutV1200ResponseSettingsQuietHoursFromRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerPutV1200ResponseSettingsQuietHoursToRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerPutV1200ResponseSettingsReminderMinDueMax = 500
+
+export const adminAutomationsControllerPutV1200ResponseSettingsStreakSaverTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerPutV1200ResponseSettingsStreakSaverMinStreakMax = 365
+
+export const adminAutomationsControllerPutV1200ResponseSettingsLearningTimeRegExp = new RegExp(
+  "^([01]\\d|2[0-3]):[0-5]\\d$",
+)
+export const adminAutomationsControllerPutV1200ResponseSettingsNewEpisodesDebounceMinMin = 0
+export const adminAutomationsControllerPutV1200ResponseSettingsNewEpisodesDebounceMinMax = 1440
+
+export const adminAutomationsControllerPutV1200ResponseSettingsNewEpisodesFreshHoursMax = 168
+
+export const adminAutomationsControllerPutV1200ResponseStatusLastTickAtMinOne = 0
+
+export const adminAutomationsControllerPutV1200ResponseStatusQueuedMin = -9007199254740991
+export const adminAutomationsControllerPutV1200ResponseStatusQueuedMax = 9007199254740991
+
+export const adminAutomationsControllerPutV1200ResponseLast7DaysItemSentMin = -9007199254740991
+export const adminAutomationsControllerPutV1200ResponseLast7DaysItemSentMax = 9007199254740991
+
+export const adminAutomationsControllerPutV1200ResponseLast7DaysItemOpenedMin = -9007199254740991
+export const adminAutomationsControllerPutV1200ResponseLast7DaysItemOpenedMax = 9007199254740991
+
+export const adminAutomationsControllerPutV1200Response = zod.object({
+  settings: zod.object({
+    quietHours: zod
+      .object({
+        from: zod.string().regex(adminAutomationsControllerPutV1200ResponseSettingsQuietHoursFromRegExp),
+        to: zod.string().regex(adminAutomationsControllerPutV1200ResponseSettingsQuietHoursToRegExp),
+      })
+      .describe("local time, default 22:00–08:00"),
+    reminder: zod.object({
+      enabled: zod.boolean(),
+      weeklyRecap: zod.boolean().describe("Sunday: a recap of the week instead of the usual reminder"),
+      minDue: zod
+        .number()
+        .min(1)
+        .max(adminAutomationsControllerPutV1200ResponseSettingsReminderMinDueMax)
+        .describe("words due before a words-due push (default 5)"),
+    }),
+    streakSaver: zod.object({
+      enabled: zod.boolean(),
+      time: zod
+        .string()
+        .regex(adminAutomationsControllerPutV1200ResponseSettingsStreakSaverTimeRegExp)
+        .describe('local time (default \"21:00\")'),
+      minStreak: zod
+        .number()
+        .min(1)
+        .max(adminAutomationsControllerPutV1200ResponseSettingsStreakSaverMinStreakMax)
+        .describe("default 2"),
+    }),
+    learning: zod.object({
+      enabled: zod.boolean(),
+      time: zod
+        .string()
+        .regex(adminAutomationsControllerPutV1200ResponseSettingsLearningTimeRegExp)
+        .describe('local time (default \"18:00\")'),
+    }),
+    newEpisodes: zod.object({
+      enabled: zod.boolean(),
+      debounceMin: zod
+        .number()
+        .min(adminAutomationsControllerPutV1200ResponseSettingsNewEpisodesDebounceMinMin)
+        .max(adminAutomationsControllerPutV1200ResponseSettingsNewEpisodesDebounceMinMax)
+        .describe("wait after going live (bundles releases)"),
+      freshHours: zod
+        .number()
+        .min(1)
+        .max(adminAutomationsControllerPutV1200ResponseSettingsNewEpisodesFreshHoursMax)
+        .describe("how long an episode stays pushable"),
+    }),
+  }),
+  status: zod.object({
+    configured: zod.boolean().describe("OneSignal keys set"),
+    enabled: zod.boolean().describe("NOTIFICATIONS_ENABLED"),
+    lastTickAt: zod
+      .union([zod.string().min(adminAutomationsControllerPutV1200ResponseStatusLastTickAtMinOne), zod.null()])
+      .describe("the scheduler's last completed run"),
+    queued: zod
+      .number()
+      .min(adminAutomationsControllerPutV1200ResponseStatusQueuedMin)
+      .max(adminAutomationsControllerPutV1200ResponseStatusQueuedMax)
+      .describe("sends waiting to go out"),
+  }),
+  last7Days: zod.array(
+    zod.object({
+      kind: zod.enum(["reminder", "streak_saver", "learning", "new_episodes", "campaign", "test"]),
+      sent: zod
+        .number()
+        .min(adminAutomationsControllerPutV1200ResponseLast7DaysItemSentMin)
+        .max(adminAutomationsControllerPutV1200ResponseLast7DaysItemSentMax),
+      opened: zod
+        .number()
+        .min(adminAutomationsControllerPutV1200ResponseLast7DaysItemOpenedMin)
+        .max(adminAutomationsControllerPutV1200ResponseLast7DaysItemOpenedMax),
+    }),
+  ),
+})
+
+export const adminSendsControllerListV1200ResponseEntriesItemIdMin = -9007199254740991
+export const adminSendsControllerListV1200ResponseEntriesItemIdMax = 9007199254740991
+
+export const adminSendsControllerListV1200ResponseEntriesItemUserIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminSendsControllerListV1200ResponseEntriesItemUserEmailMinOne = 0
+
+export const adminSendsControllerListV1200ResponseEntriesItemVariantMinOne = 0
+
+export const adminSendsControllerListV1200ResponseEntriesItemCampaignIdRegExpOne = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminSendsControllerListV1200ResponseEntriesItemSkipReasonMinOne = 0
+
+export const adminSendsControllerListV1200ResponseEntriesItemLinkIdRegExp = new RegExp(
+  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+)
+export const adminSendsControllerListV1200ResponseEntriesItemSentAtMinOne = 0
+
+export const adminSendsControllerListV1200ResponseEntriesItemOpenedAtMinOne = 0
+
+export const adminSendsControllerListV1200ResponseNextBeforeMin = -9007199254740991
+export const adminSendsControllerListV1200ResponseNextBeforeMax = 9007199254740991
+
+export const adminSendsControllerListV1200Response = zod.object({
+  entries: zod.array(
+    zod.object({
+      id: zod
+        .number()
+        .min(adminSendsControllerListV1200ResponseEntriesItemIdMin)
+        .max(adminSendsControllerListV1200ResponseEntriesItemIdMax),
+      user: zod.object({
+        id: zod.uuid().regex(adminSendsControllerListV1200ResponseEntriesItemUserIdRegExp),
+        email: zod.union([
+          zod.string().min(adminSendsControllerListV1200ResponseEntriesItemUserEmailMinOne),
+          zod.null(),
+        ]),
+        isAnonymous: zod.boolean(),
+      }),
+      kind: zod.enum(["reminder", "streak_saver", "learning", "new_episodes", "campaign", "test"]),
+      variant: zod.union([
+        zod.string().min(adminSendsControllerListV1200ResponseEntriesItemVariantMinOne),
+        zod.null(),
+      ]),
+      campaignId: zod.union([
+        zod.uuid().regex(adminSendsControllerListV1200ResponseEntriesItemCampaignIdRegExpOne),
+        zod.null(),
+      ]),
+      status: zod.enum([
+        "queued",
+        "sending",
+        "sent",
+        "failed",
+        "unreachable",
+        "expired",
+        "canceled",
+        "skipped",
+      ]),
+      skipReason: zod.union([
+        zod.string().min(adminSendsControllerListV1200ResponseEntriesItemSkipReasonMinOne),
+        zod.null(),
+      ]),
+      language: zod.enum([
+        "ar",
+        "de",
+        "en",
+        "es",
+        "fr",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "pl",
+        "pt",
+        "ru",
+        "tr",
+        "vi",
+        "zh",
+      ]),
+      title: zod.string(),
+      body: zod.string(),
+      link: zod.object({
+        type: zod.enum(["home", "episode", "podcast", "player", "paywall", "review", "words"]),
+        id: zod
+          .uuid()
+          .regex(adminSendsControllerListV1200ResponseEntriesItemLinkIdRegExp)
+          .optional()
+          .describe("episode (episode, player) or podcast id"),
+        level: zod
+          .enum(["bg", "in", "ad"])
+          .optional()
+          .describe("bg = beginner, in = intermediate, ad = advanced"),
+      }),
+      localDate: zod.string(),
+      dueAt: zod.string().describe("ISO timestamp"),
+      sentAt: zod
+        .union([zod.string().min(adminSendsControllerListV1200ResponseEntriesItemSentAtMinOne), zod.null()])
+        .describe("ISO timestamp"),
+      openedAt: zod
+        .union([zod.string().min(adminSendsControllerListV1200ResponseEntriesItemOpenedAtMinOne), zod.null()])
+        .describe("ISO timestamp"),
+      createdAt: zod.string().describe("ISO timestamp"),
+    }),
+  ),
+  nextBefore: zod
+    .number()
+    .min(adminSendsControllerListV1200ResponseNextBeforeMin)
+    .max(adminSendsControllerListV1200ResponseNextBeforeMax)
     .optional()
     .describe("pass as ?before= for older entries; absent at the end"),
 })

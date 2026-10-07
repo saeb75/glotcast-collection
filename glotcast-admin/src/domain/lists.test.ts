@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest"
-import { episodesParams, episodesRequest, parseAudit, parseEpisodes, PAGE_SIZE } from "./lists"
+import {
+  campaignsParams,
+  campaignsRequest,
+  episodesParams,
+  episodesRequest,
+  PAGE_SIZE,
+  parseAudit,
+  parseCampaigns,
+  parseEpisodes,
+  parseSendLog,
+  sendLogParams,
+  sendLogRequest,
+} from "./lists"
 import { safeNext } from "./query"
 
 describe("episode list query ↔ URL", () => {
@@ -45,5 +57,43 @@ describe("safeNext", () => {
     expect(safeNext("https://evil.example")).toBe("/")
     expect(safeNext("/login")).toBe("/")
     expect(safeNext(null)).toBe("/")
+  })
+})
+
+describe("campaign list query ↔ URL", () => {
+  it("filters by status and pages", () => {
+    expect(parseCampaigns(new URLSearchParams())).toEqual({ status: "all", page: 1 })
+    const q = parseCampaigns(new URLSearchParams("status=sent&page=2"))
+    expect(campaignsRequest(q)).toEqual({ status: "sent", page: 2, pageSize: PAGE_SIZE })
+    expect(campaignsParams({ status: "all", page: 1 }).toString()).toBe("")
+    expect(parseCampaigns(new URLSearchParams("status=bogus")).status).toBe("all")
+  })
+})
+
+describe("send log query ↔ URL", () => {
+  const USER = "0A1B2C3D-4E5F-4061-8273-94A5B6C7D8E9"
+
+  it("reads the filters and sends only valid ids", () => {
+    const q = parseSendLog(new URLSearchParams(`kind=campaign&status=skipped&campaign=nope&user=${USER}`))
+    expect(q).toEqual({ kind: "campaign", status: "skipped", campaign: "nope", user: USER })
+    expect(sendLogRequest(q)).toEqual({
+      kind: "campaign",
+      status: "skipped",
+      campaignId: undefined,
+      userId: USER.toLowerCase(),
+    })
+    expect(sendLogRequest(parseSendLog(new URLSearchParams("user=ash")))).toEqual({
+      kind: undefined,
+      status: undefined,
+      campaignId: undefined,
+      userId: undefined,
+    })
+  })
+
+  it("writes only what differs from the defaults", () => {
+    expect(sendLogParams({ kind: "all", status: "all", campaign: "all", user: "" }).toString()).toBe("")
+    expect(sendLogParams({ kind: "test", status: "all", campaign: "all", user: "" }).toString()).toBe(
+      "kind=test",
+    )
   })
 })

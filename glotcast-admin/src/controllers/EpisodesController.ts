@@ -69,9 +69,13 @@ export class EpisodesController {
     })
   }
 
-  static async publish(id: string) {
+  /** Live now; `notifyFollowers` decides whether its podcast's followers get a push (absent: kept). */
+  static async publish(id: string, notifyFollowers?: boolean) {
     return this.busy(id, "publish", async () => {
-      const episode = await runAction(() => publishEpisode(id), EPISODES.editor.published)
+      const episode = await runAction(
+        () => publishEpisode(id, notifyFollowers === undefined ? {} : { notifyFollowers }),
+        EPISODES.editor.published,
+      )
       if (episode) this.merged(episode)
       return episode
     })
@@ -85,9 +89,13 @@ export class EpisodesController {
     })
   }
 
-  /** Goes live at `publishedAt` (ISO, in the future). */
-  static async schedule(id: string, publishedAt: string) {
-    return this.update(id, { publishedAt }, EPISODES.editor.scheduled(formatDateTime(publishedAt)))
+  /** Goes live at `publishedAt` (ISO, in the future), pushing its followers then when `notifyFollowers`. */
+  static async schedule(id: string, publishedAt: string, notifyFollowers: boolean) {
+    return this.update(
+      id,
+      { publishedAt, notifyFollowers },
+      EPISODES.editor.scheduled(formatDateTime(publishedAt)),
+    )
   }
 
   static async remove(id: string): Promise<boolean> {

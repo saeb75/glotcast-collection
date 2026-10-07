@@ -24,6 +24,7 @@ import { StatusBadge } from "./StatusBadge"
 const CREATE = [
   { to: "/podcasts/new", label: NAV_COPY.newPodcast },
   { to: "/episodes/new", label: NAV_COPY.newEpisode },
+  { to: "/notifications/new", label: NAV_COPY.newCampaign },
 ]
 
 /** ⌘K / Ctrl K: jump to a page, open a podcast or an episode by name, start a new one. */

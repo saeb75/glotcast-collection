@@ -10,10 +10,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { CAMPAIGNS } from "@/copy/campaigns"
 import { EPISODES } from "@/copy/episodes"
 import { PODCASTS } from "@/copy/podcasts"
 import { USERS } from "@/copy/users"
 import { shortId } from "@/domain/format"
+import { useCampaignsStore } from "@/stores/useCampaignsStore"
 import { useEpisodesStore } from "@/stores/useEpisodesStore"
 import { useListsStore } from "@/stores/useListsStore"
 import { usePodcastsStore } from "@/stores/usePodcastsStore"
@@ -31,16 +33,22 @@ export function HeaderTrail() {
   )
   const list = useListsStore((s) => (area === "lists" && id ? s.details[id]?.data?.name : undefined))
   const user = useUsersStore((s) => (area === "users" && id ? s.details[id]?.data?.user : undefined))
+  const campaign = useCampaignsStore((s) =>
+    area === "notifications" && id ? s.details[id]?.data?.name : undefined,
+  )
 
   const child = !id
     ? null
     : id === "new"
       ? area === "podcasts"
         ? PODCASTS.editor.newTitle
-        : EPISODES.create.title
+        : area === "notifications"
+          ? CAMPAIGNS.editor.newTitle
+          : EPISODES.create.title
       : (podcast ??
         episode ??
         list ??
+        campaign ??
         (user ? (user.email ?? user.name ?? USERS.guest) : null) ??
         shortId(id))
 
