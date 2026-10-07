@@ -81,7 +81,7 @@ Coolify's HTTPS redirect.
   `node dist/cli.js admin grant <email>` (a registered Supabase account), then sign in at `https://admin.glotcast.com`.
   `admin list` shows who has the role, `admin revoke <email>` removes it; the role reaches the token on the next
   sign-in or token refresh.
-- **The app:** in the EAS environments, `EXPO_PUBLIC_API_URL=https://api.glotcast.com`, `EXPO_PUBLIC_SUPABASE_URL`
+- **The app:** in the EAS environments, `EXPO_PUBLIC_GLOTCAST_API_URL=https://api.glotcast.com`, `EXPO_PUBLIC_SUPABASE_URL`
   and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, then build. The Google Translate key no longer ships in the app.
 - **Updates:** redeploy; migrations apply on start. `npm run db:generate` (locally) creates new migration files —
   commit them with the schema change. Never `drizzle-kit push` against Supabase.
