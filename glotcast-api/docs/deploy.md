@@ -16,29 +16,42 @@ Before the first deploy, do the Supabase steps of `docs/cutover.md` (§1): the A
 
 ## 1. Create the resource
 
-Coolify builds from one git repository. Two ways to lay it out:
+The repository is `saeb75/glotcast-collection` (branch `main`): `glotcast-api/` and `glotcast-admin/` side by side.
+Two ways to lay it out:
 
-- **One resource (this compose file).** The repository holds both folders side by side — `glotcast-api/` and
-  `glotcast-admin/` (the `glot-cast` monorepo). Coolify → your project → **New Resource → Docker Compose** → the
-  repository, compose file `/glotcast-api/docker-compose.yml`. Build contexts are relative to the compose file, so
-  `../glotcast-admin` resolves.
-- **Two resources.** If the API and the admin panel live in separate repositories: **New Resource → Dockerfile** for
-  each (this repo's `Dockerfile`; the admin's own), with the variables of §2 split between them. The compose file
-  then only documents the pairing.
+- **One resource (this compose file).** Coolify → your project → **New Resource → Docker Compose** → the repository,
+  then:
+  - **Base Directory:** `/glotcast-api`
+  - **Docker Compose Location:** `/docker-compose.yml`
 
-Domains: `api` → `https://api.glotcast.app` (port 3000); `admin` → `https://admin.glotcast.app`. HTTPS certificates come
-from Coolify. Optionally turn on automatic deployment on push.
+  Not Base Directory `/` with `/glotcast-api/docker-compose.yml`: Coolify runs
+  `docker compose --project-directory <base directory>`, and relative build contexts resolve from there — `.` would
+  be the repository root and `../glotcast-admin` would point outside it. With `/glotcast-api` as the base, `.` is the
+  API and `../glotcast-admin` the panel (the whole repository is cloned).
+- **Two resources.** **New Resource → Dockerfile** for each, from the same repository: Base Directory
+  `/glotcast-api` and `/glotcast-admin`, the variables of §2 split between them (the admin needs only its three
+  build variables). Each deploys on its own and the API gets Coolify's rolling updates (Docker Compose resources have
+  none); watch paths (`glotcast-api/**`, `glotcast-admin/**`) keep a push from rebuilding both.
+
+Domains (Coolify → the resource → each service's **Domains**): `api` → `https://api.glotcast.app:3000`, `admin` →
+`https://admin.glotcast.app:3000`. The `:3000` is the container port Coolify's proxy forwards to (without it, port
+80); the public URLs stay `https://api.glotcast.app` and `https://admin.glotcast.app`. HTTPS certificates come from
+Coolify. Optionally turn on automatic deployment on push.
 
 ## 2. Environment variables
 
-Coolify lists every `${…}` of the compose file. `.env.example` says where each value comes from.
+Coolify lists every `${…}` of the compose file (`${X:?}` ones are marked required). `.env.example` says where each
+value comes from. Keep **Available at Buildtime** on for the required ones (the default): the build interpolates the
+whole compose file, so a required variable missing at build time fails it. In a single compose resource, Coolify also
+injects all of the resource's variables into every container (an `env_file: .env` it adds) — the admin container
+holds the API's secrets too, unused; the two-resource layout keeps them apart.
 
 | Variable | Value | Secret |
 |---|---|---|
 | `DATABASE_URL` | Supabase → Connect → **Transaction pooler** (port 6543) | yes |
 | `DATABASE_MIGRATION_URL` | Supabase → Connect → **Session pooler** (port 5432): `db-migrate` runs on it at every start | yes |
 | `DATABASE_SSL` | `true` (default in the compose file) | |
-| `DATABASE_SSL_CA` | the Supabase CA (Project Settings → Database → SSL Configuration → Download certificate): paste the PEM and tick *Is Multiline?* | |
+| `DATABASE_SSL_CA` | the Supabase CA (Project Settings → Database → SSL Configuration → Download certificate): paste the PEM and tick *Is Multiline?* (one line with `\n` escapes works too) | |
 | `SUPABASE_URL` | `https://aoayqnsusoxjodjoxqaj.supabase.co` | |
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API Keys → **Secret key** — deletes accounts and claimed guests | yes |
 | `SUPABASE_JWT_SECRET` | only while the project still signs with the legacy HS256 secret | yes |

@@ -2,6 +2,9 @@
 # The database and auth stay on Supabase, media on Cloudflare R2. Set every ${…} in Coolify's Environment
 # Variables; docs/deploy.md walks through it.
 #
+# Coolify: Base Directory `/glotcast-api`, Docker Compose Location `/docker-compose.yml` — Coolify resolves build
+# contexts from the base directory, so `../glotcast-admin` only works with this folder as the base.
+#
 # `admin` is the Next.js panel in ../glotcast-admin (its own Dockerfile): both folders must be in the checkout
 # Coolify builds from (see docs/deploy.md for deploying them as two resources instead).
 services:

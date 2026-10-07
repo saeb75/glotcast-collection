@@ -8,12 +8,16 @@ export const PG_POOL = Symbol("PG_POOL")
 export const DRIZZLE = Symbol("DRIZZLE")
 export type Database = NodePgDatabase
 
-/** DATABASE_SSL_CA may hold the PEM itself or a path to it. */
+/**
+ * DATABASE_SSL_CA may hold the PEM itself — multiline, or on one line with `\n` escapes (env UIs that mangle
+ * newlines) — or a path to it.
+ */
 export function sslConfig(config: AppConfig): PoolConfig["ssl"] {
   if (!config.get("DATABASE_SSL")) return undefined
   const ca = config.get("DATABASE_SSL_CA")
   if (!ca) return { rejectUnauthorized: true }
-  return { rejectUnauthorized: true, ca: ca.includes("BEGIN CERTIFICATE") ? ca : readFileSync(ca, "utf8") }
+  if (!ca.includes("BEGIN CERTIFICATE")) return { rejectUnauthorized: true, ca: readFileSync(ca, "utf8") }
+  return { rejectUnauthorized: true, ca: ca.replace(/\\n/g, "\n") }
 }
 
 @Injectable()
