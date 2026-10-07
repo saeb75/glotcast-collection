@@ -13,8 +13,9 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
-# Read at runtime next to dist/: the migrations db-migrate applies on every start.
+# Read at runtime next to dist/: the migrations db-migrate applies on every start, the Supabase CA.
 COPY drizzle ./drizzle
+COPY certs ./certs
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \

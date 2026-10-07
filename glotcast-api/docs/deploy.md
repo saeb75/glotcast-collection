@@ -6,8 +6,8 @@ keeps `public`, this API owns schema `app`). Media lives on **Cloudflare R2**. C
 
 | Service | What | Reachable at |
 |---|---|---|
-| `api` | This NestJS API (`glotcast-api/`) — everything the app and the admin panel call, and its CLI | `https://api.glotcast.app` (port 3000) |
-| `admin` | The admin panel (Next.js standalone, `glotcast-admin/`) | `https://admin.glotcast.app` (port 3000) |
+| `api` | This NestJS API (`glotcast-api/`) — everything the app and the admin panel call, and its CLI | `https://apiv2.glotcast.app` (port 3000) |
+| `admin` | The admin panel (Next.js standalone, `glotcast-admin/`) | `https://adminv2.glotcast.app` (port 3000) |
 
 **Server:** the API is light: 1 vCPU / 1 GB RAM is enough for both containers. amd64 or arm64.
 
@@ -19,9 +19,9 @@ Before the first deploy, do the Supabase steps of `docs/cutover.md` (§1): the A
 1. Coolify → your project → **New Resource → Docker Compose** → the GitHub repo `saeb75/glotcast-collection`, branch
    `main` (private: connect it through Coolify's GitHub App or a deploy key).
 2. Base Directory `/`, compose file `/docker-compose.yml`. Coolify lists the two services.
-3. **Domains:** `api` → `https://api.glotcast.app:3000`; `admin` → `https://admin.glotcast.app:3000`. The `:3000` is
+3. **Domains:** `api` → `https://apiv2.glotcast.app:3000`; `admin` → `https://adminv2.glotcast.app:3000`. The `:3000` is
    the container port Coolify's proxy forwards to (without it, port 80); the public URLs stay
-   `https://api.glotcast.app` and `https://admin.glotcast.app`. HTTPS certificates come from Coolify.
+   `https://apiv2.glotcast.app` and `https://adminv2.glotcast.app`. HTTPS certificates come from Coolify.
 4. Optional: turn on automatic deployment on push to `main`.
 
 ## 2. Environment variables
@@ -36,14 +36,12 @@ secrets too, unused.
 |---|---|---|
 | `DATABASE_URL` | Supabase → Connect → **Transaction pooler** (port 6543) | yes |
 | `DATABASE_MIGRATION_URL` | Supabase → Connect → **Session pooler** (port 5432): `db-migrate` runs on it at every start | yes |
-| `DATABASE_SSL` | `true` (default in the compose file) | |
-| `DATABASE_SSL_CA` | the Supabase CA (Project Settings → Database → SSL Configuration → Download certificate): paste the PEM and tick *Is Multiline?* (one line with `\n` escapes works too) | |
 | `SUPABASE_URL` | `https://aoayqnsusoxjodjoxqaj.supabase.co` | |
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API Keys → **Secret key** — deletes accounts and claimed guests | yes |
 | `SUPABASE_JWT_SECRET` | only while the project still signs with the legacy HS256 secret | yes |
 | `SUPABASE_PUBLISHABLE_KEY` | Project Settings → API Keys → **Publishable key** (the admin panel's sign-in) | |
-| `CORS_ORIGINS` | `https://admin.glotcast.app` | |
-| `ADMIN_API_URL` | `https://api.glotcast.app` | |
+| `CORS_ORIGINS` | `https://adminv2.glotcast.app` | |
+| `ADMIN_API_URL` | `https://apiv2.glotcast.app` | |
 | `TRUST_PROXY` | `1` behind Coolify's proxy alone; **`2`** when Cloudflare proxies the domain (orange cloud) | |
 | `GOOGLE_TRANSLATE_API_KEY` | Cloud Translation v2 key (server only) | yes |
 | `YANDEX_DICT_KEY` | Yandex Dictionary key | yes |
@@ -59,7 +57,8 @@ Mark `ADMIN_API_URL`, `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` as **build v
 `NEXT_PUBLIC_*` values in. The compose file passes them as `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL` and
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` build args — check those names against glotcast-admin's Dockerfile.
 
-The compose file fixes the rest (`NODE_ENV=production`, `PORT=3000`).
+The compose file fixes the rest: `NODE_ENV=production`, `PORT=3000`, and `DATABASE_SSL=true` with the Supabase CA
+from the image (`glotcast-api/certs/supabase-ca.crt`, the Supabase Root 2021 CA — the same for every project).
 
 **Cloudflare in front** (proxied DNS record): SSL/TLS mode **Full** or **Full (strict)** — "Flexible" loops with
 Coolify's HTTPS redirect.
@@ -70,7 +69,7 @@ Coolify's HTTPS redirect.
 - **Migrations run on every start:** `node dist/cli.js db-migrate && exec node dist/main.js`. They only ever touch
   schema `app` (drizzle-kit sees nothing else) and are no-ops once applied. The first one creates schema `app`, the
   `unaccent` and `pg_trgm` extensions (in `extensions`, Supabase's default) and every table, with RLS on.
-- **Check:** `https://api.glotcast.app/v1/health/ready` → `{"ok":true,"checks":{"database":"up"}}`. The container
+- **Check:** `https://apiv2.glotcast.app/v1/health/ready` → `{"ok":true,"checks":{"database":"up"}}`. The container
   healthcheck calls `/v1/health/live`.
 - **Logs:** per service in Coolify; JSON (pino) with a request id per line (`x-request-id` is echoed in responses;
   pass your own to correlate). Authorization headers are redacted. Swagger (`/docs`) is off in production.
@@ -79,10 +78,10 @@ Coolify's HTTPS redirect.
 
 - **Content:** the production migration from Strapi — `docs/cutover.md` §3 (dry run, run, verify counts).
 - **Admin access:** in the api container's terminal (Coolify → the resource → Terminal → `api`):
-  `node dist/cli.js admin grant <email>` (a registered Supabase account), then sign in at `https://admin.glotcast.app`.
+  `node dist/cli.js admin grant <email>` (a registered Supabase account), then sign in at `https://adminv2.glotcast.app`.
   `admin list` shows who has the role, `admin revoke <email>` removes it; the role reaches the token on the next
   sign-in or token refresh.
-- **The app:** in the EAS environments, `EXPO_PUBLIC_API_URL=https://api.glotcast.app`, `EXPO_PUBLIC_SUPABASE_URL`
+- **The app:** in the EAS environments, `EXPO_PUBLIC_API_URL=https://apiv2.glotcast.app`, `EXPO_PUBLIC_SUPABASE_URL`
   and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, then build. The Google Translate key no longer ships in the app.
 - **Updates:** redeploy; migrations apply on start. `npm run db:generate` (locally) creates new migration files —
   commit them with the schema change. Never `drizzle-kit push` against Supabase.

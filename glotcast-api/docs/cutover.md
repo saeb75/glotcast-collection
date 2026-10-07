@@ -28,7 +28,7 @@ rollback is just "keep using the old stack".
    guest in place with `linkIdentity()` (same user id, nothing to claim). When the user signs in to an existing
    account instead, the app calls `POST /v1/me/claim-guest` with the guest's access token.
 5. **Redirect URLs** — Authentication → URL Configuration: the app's scheme (e.g. `glotcast://**`) and
-   `https://admin.glotcast.app/**`.
+   `https://adminv2.glotcast.app/**`.
 6. **Signing keys** — Project Settings → JWT Keys: use asymmetric signing keys (the API verifies tokens against the
    project's JWKS and needs no secret). While the project still signs with the legacy HS256 secret, set
    `SUPABASE_JWT_SECRET`; remove it once the legacy key is revoked.
@@ -126,7 +126,7 @@ Run in the API container's terminal (Coolify → the resource → Terminal → `
 9. **Push notifications** — deploy with `NOTIFICATIONS_ENABLED=false`; the go-live (OneSignal keys, dry run, the
    reminder alone first) is `docs/deploy.md` §5. `migrate-strapi` marks the migrated episodes as announced, so the
    back catalog never reaches followers.
-10. **Release** — the new app (pointing at `https://api.glotcast.app`), the admin panel for editors. Old app versions
+10. **Release** — the new app (pointing at `https://apiv2.glotcast.app`), the admin panel for editors. Old app versions
    keep using Strapi and the vocab service: what they write there after a user's first sign-in to the new app is not
    copied again. Raise `APP_MIN_SUPPORTED_VERSION` to retire them, then stop Strapi and glotcast-vocab (keep their
    tables until you no longer need them).
