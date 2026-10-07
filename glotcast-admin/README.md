@@ -74,8 +74,8 @@ only, into `src/schemas/api.gen.ts`).
 ## Deploy (Coolify)
 
 `Dockerfile` (node:22-alpine, multi-stage, Next's `output: "standalone"` server on **port 3000**, runs as `node`,
-healthcheck `/login`). It is the `admin` service of `../glotcast-api/docker-compose.yml` (build context
-`../glotcast-admin`); `../glotcast-api/docs/deploy.md` walks through the resource. The three build arguments are baked
+healthcheck `/login`). It is the `admin` service of `../docker-compose.yml` at the repo root (build context
+`./glotcast-admin`); `../glotcast-api/docs/deploy.md` walks through the resource. The three build arguments are baked
 into the bundle, so mark them as **build variables** in Coolify:
 
 | Build arg | Value |

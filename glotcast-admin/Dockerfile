@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# The admin panel: Next.js standalone server on :3000 (the `admin` service of ../glotcast-api/docker-compose.yml).
+# The admin panel: Next.js standalone server on :3000 (the `admin` service of ../docker-compose.yml).
 # Build from this folder: docker build -t glotcast-admin --build-arg NEXT_PUBLIC_API_URL=… .
 # NEXT_PUBLIC_* are baked into the bundles at build time (Coolify: mark them as build variables).
 FROM node:22-alpine AS deps

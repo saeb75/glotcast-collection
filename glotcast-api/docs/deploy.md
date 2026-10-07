@@ -2,12 +2,12 @@
 
 The database and auth stay on **Supabase** (project `aoayqnsusoxjodjoxqaj`, the same Postgres Strapi uses: Strapi
 keeps `public`, this API owns schema `app`). Media lives on **Cloudflare R2**. Coolify runs two containers from
-`docker-compose.yml`:
+`docker-compose.yml` at the repo root:
 
 | Service | What | Reachable at |
 |---|---|---|
-| `api` | This NestJS API — everything the app and the admin panel call, and its CLI | `https://api.glotcast.app` (port 3000) |
-| `admin` | The admin panel (Next.js, `../glotcast-admin`, its own Dockerfile) | `https://admin.glotcast.app` (its port, 3000 for `next start`) |
+| `api` | This NestJS API (`glotcast-api/`) — everything the app and the admin panel call, and its CLI | `https://api.glotcast.app` (port 3000) |
+| `admin` | The admin panel (Next.js standalone, `glotcast-admin/`) | `https://admin.glotcast.app` (port 3000) |
 
 **Server:** the API is light: 1 vCPU / 1 GB RAM is enough for both containers. amd64 or arm64.
 
@@ -16,35 +16,21 @@ Before the first deploy, do the Supabase steps of `docs/cutover.md` (§1): the A
 
 ## 1. Create the resource
 
-The repository is `saeb75/glotcast-collection` (branch `main`): `glotcast-api/` and `glotcast-admin/` side by side.
-Two ways to lay it out:
-
-- **One resource (this compose file).** Coolify → your project → **New Resource → Docker Compose** → the repository,
-  then:
-  - **Base Directory:** `/glotcast-api`
-  - **Docker Compose Location:** `/docker-compose.yml`
-
-  Not Base Directory `/` with `/glotcast-api/docker-compose.yml`: Coolify runs
-  `docker compose --project-directory <base directory>`, and relative build contexts resolve from there — `.` would
-  be the repository root and `../glotcast-admin` would point outside it. With `/glotcast-api` as the base, `.` is the
-  API and `../glotcast-admin` the panel (the whole repository is cloned).
-- **Two resources.** **New Resource → Dockerfile** for each, from the same repository: Base Directory
-  `/glotcast-api` and `/glotcast-admin`, the variables of §2 split between them (the admin needs only its three
-  build variables). Each deploys on its own and the API gets Coolify's rolling updates (Docker Compose resources have
-  none); watch paths (`glotcast-api/**`, `glotcast-admin/**`) keep a push from rebuilding both.
-
-Domains (Coolify → the resource → each service's **Domains**): `api` → `https://api.glotcast.app:3000`, `admin` →
-`https://admin.glotcast.app:3000`. The `:3000` is the container port Coolify's proxy forwards to (without it, port
-80); the public URLs stay `https://api.glotcast.app` and `https://admin.glotcast.app`. HTTPS certificates come from
-Coolify. Optionally turn on automatic deployment on push.
+1. Coolify → your project → **New Resource → Docker Compose** → the GitHub repo `saeb75/glotcast-collection`, branch
+   `main` (private: connect it through Coolify's GitHub App or a deploy key).
+2. Base Directory `/`, compose file `/docker-compose.yml`. Coolify lists the two services.
+3. **Domains:** `api` → `https://api.glotcast.app:3000`; `admin` → `https://admin.glotcast.app:3000`. The `:3000` is
+   the container port Coolify's proxy forwards to (without it, port 80); the public URLs stay
+   `https://api.glotcast.app` and `https://admin.glotcast.app`. HTTPS certificates come from Coolify.
+4. Optional: turn on automatic deployment on push to `main`.
 
 ## 2. Environment variables
 
 Coolify lists every `${…}` of the compose file (`${X:?}` ones are marked required). `.env.example` says where each
 value comes from. Keep **Available at Buildtime** on for the required ones (the default): the build interpolates the
-whole compose file, so a required variable missing at build time fails it. In a single compose resource, Coolify also
-injects all of the resource's variables into every container (an `env_file: .env` it adds) — the admin container
-holds the API's secrets too, unused; the two-resource layout keeps them apart.
+whole compose file, so a required variable missing at build time fails it. Coolify also injects all of the
+resource's variables into every container (an `env_file: .env` it adds): the admin container holds the API's
+secrets too, unused.
 
 | Variable | Value | Secret |
 |---|---|---|

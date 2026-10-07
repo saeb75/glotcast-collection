@@ -1,6 +1,6 @@
 # GlotCast server
 
-The backend of GlotCast 2.0, deployed as one Coolify resource (`glotcast-api/docker-compose.yml`):
+The backend of GlotCast 2.0, deployed as one Coolify resource (`docker-compose.yml`):
 
 - **[`glotcast-api/`](glotcast-api)** — NestJS 11 + Drizzle API on Supabase Postgres (schema `app`): auth (Supabase
   tokens), catalog, listening progress and streaks, words (Leitner), translation, the admin API and the content

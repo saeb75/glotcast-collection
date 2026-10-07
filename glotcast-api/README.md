@@ -88,5 +88,5 @@ rows written by Strapi itself.
 ## Deploy
 
 `Dockerfile` (node:22-slim, runs as `node`, `db-migrate` then the server, healthcheck `/v1/health/live`) and
-`docker-compose.yml` (`api` + the Next.js `admin` from `../glotcast-admin`) on Coolify: `docs/deploy.md`.
+`../docker-compose.yml` at the repo root (`api` + the Next.js `admin`) on Coolify: `docs/deploy.md`.
 The production switch from Strapi (Supabase settings, env, the migration procedure): `docs/cutover.md`.

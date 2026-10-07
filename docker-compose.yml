@@ -1,16 +1,10 @@
-# GlotCast server: the API and the admin panel, one Coolify resource (New Resource → Docker Compose, this file).
+# The server: the API and the admin panel, one Coolify resource (New Resource → Docker Compose, this file).
 # The database and auth stay on Supabase, media on Cloudflare R2. Set every ${…} in Coolify's Environment
-# Variables; docs/deploy.md walks through it.
-#
-# Coolify: Base Directory `/glotcast-api`, Docker Compose Location `/docker-compose.yml` — Coolify resolves build
-# contexts from the base directory, so `../glotcast-admin` only works with this folder as the base.
-#
-# `admin` is the Next.js panel in ../glotcast-admin (its own Dockerfile): both folders must be in the checkout
-# Coolify builds from (see docs/deploy.md for deploying them as two resources instead).
+# Variables; glotcast-api/docs/deploy.md walks through it. Each service builds from its own folder.
 services:
   api:
     build:
-      context: .
+      context: ./glotcast-api
       dockerfile: Dockerfile
     environment:
       NODE_ENV: production
@@ -52,7 +46,7 @@ services:
     # Built by its own Dockerfile; the build args are the public values a Next.js build bakes in (match the names
     # glotcast-admin's Dockerfile declares).
     build:
-      context: ../glotcast-admin
+      context: ./glotcast-admin
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${ADMIN_API_URL:?}
